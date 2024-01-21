@@ -270,16 +270,13 @@ static void AnalyzeGameLayout()
 			pgi->nInput = GIT_MACRO_AUTO;
 			pgi->nType = BIT_DIGITAL;
 			pgi->Macro.nMode = 0;
-			sprintf(pgi->Macro.szName, "P%i Buttons BCD", nPlayer + 1);
+			sprintf(pgi->Macro.szName, "P%i Buttons BC", nPlayer + 1);
 			BurnDrvGetInputInfo(&bii, nNeogeoButtons[nPlayer][1]);
 			pgi->Macro.pVal[0] = bii.pVal;
 			pgi->Macro.nVal[0] = 1;
 			BurnDrvGetInputInfo(&bii, nNeogeoButtons[nPlayer][2]);
 			pgi->Macro.pVal[1] = bii.pVal;
 			pgi->Macro.nVal[1] = 1;
-			BurnDrvGetInputInfo(&bii, nNeogeoButtons[nPlayer][3]);
-			pgi->Macro.pVal[2] = bii.pVal;
-			pgi->Macro.nVal[2] = 1;
 			nMacroCount++;
 			pgi++;
 		}
@@ -1879,7 +1876,7 @@ static INT32 GameInpSpecialOne(struct GameInp* pgi, INT32 nPlayer, char* szb, ch
 	if (bIsNeogeoCartGame || (nGameType == RETRO_GAME_TYPE_NEOCD)) {
 		if (strncmp("Buttons ABC", description, 11) == 0)
 			GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_4TH_COL_BOTTOM, description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
-		if (strncmp("Buttons BCD", description, 11) == 0)
+		if (strncmp("Buttons BC", description, 11) == 0)
 			GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_4TH_COL_TOP, description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
 		if (strncmp("Buttons AB", description, 10) == 0)
 			GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_3RD_COL_BOTTOM, description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
