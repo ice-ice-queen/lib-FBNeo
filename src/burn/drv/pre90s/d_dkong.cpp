@@ -4018,6 +4018,42 @@ struct BurnDriver BurnDrvdkaccel = {
 	224, 256, 3, 4
 };
 
+// Donkey Kong Pac-Man Crossover
+static struct BurnRomInfo dkpmxRomDesc[] = {
+	{ "dkpmx.5et",	0x1000, 0xa7a913d5, 1 | BRF_PRG | BRF_ESS }, //  0 maincpu
+	{ "dkpmx.5ct",	0x1000, 0x03ce5531, 1 | BRF_PRG | BRF_ESS }, //  1
+	{ "dkpmx.5bt",	0x1000, 0xabaf3fa1, 1 | BRF_PRG | BRF_ESS }, //  2
+	{ "dkpmx.5at",	0x1000, 0x843a9751, 1 | BRF_PRG | BRF_ESS }, //  3
+
+	{ "dkpmx_s_3i_b.bin",	0x0800, 0x4f865d26, 2 | BRF_PRG | BRF_ESS }, //  4 soundcpu
+	{ "dkpmx_s_3j_b.bin",	0x0800, 0x4743fe92, 2 | BRF_PRG | BRF_ESS }, //  5
+
+	{ "dkpmx_v_5h_b.bin",	0x0800, 0xb212d49b, 3 | BRF_GRA },           //  6 gfx1
+	{ "dkpmx_v_3pt.bin",	0x0800, 0x2bd67b35, 3 | BRF_GRA },           //  7
+
+	{ "dkpmx_l_4m_b.bin",	0x0800, 0x7db40811, 4 | BRF_GRA }, 			 //  8 gfx2
+	{ "dkpmx_l_4n_b.bin",	0x0800, 0xc9f3b37a, 4 | BRF_GRA }, 			 //  9
+	{ "dkpmx_l_4r_b.bin",	0x0800, 0x137ad00e, 4 | BRF_GRA }, 			 // 10
+	{ "dkpmx_l_4s_b.bin",	0x0800, 0x72b56559, 4 | BRF_GRA }, 			 // 11
+
+	{ "dkpmx_c-2k.bpr",	0x0100, 0x929a396b, 5 | BRF_GRA },           // 12 proms
+	{ "dkpmx_c-2j.bpr",	0x0100, 0x1aa9c17e, 5 | BRF_GRA },           // 13
+	{ "dkpmx_v-5e.bpr",	0x0100, 0xd06c6ba8, 5 | BRF_GRA },           // 14
+};
+
+STD_ROM_PICK(dkpmx)
+STD_ROM_FN(dkpmx)
+
+struct BurnDriver BurnDrvdkpmx = {
+	"dkpmx", "dkong", NULL, "dkong", "2024",
+	"Donkey Kong Pac-Man Crossover\0", NULL, "Paul Goes", "Miscellaneous",
+	NULL, NULL, NULL, NULL,
+	BDF_GAME_WORKING | BDF_CLONE | BDF_HACK | BDF_ORIENTATION_VERTICAL | BDF_ORIENTATION_FLIPPED, 2, HARDWARE_MISC_PRE90S, GBF_PLATFORM | GBF_ACTION, 0,
+	NULL, dkpmxRomInfo, dkpmxRomName, NULL, NULL, DkongSampleInfo, DkongSampleName, DkongInputInfo, DkongfDIPInfo,
+	dkongInit, DrvExit, DrvFrame, dkongDraw, DrvScan, &DrvRecalc, 0x100,
+	224, 256, 3, 4
+};
+
 // Donkey Kong Anniversary Edition
 
 static struct BurnRomInfo dkong40yRomDesc[] = {
@@ -4216,6 +4252,46 @@ struct BurnDriver BurnDrvDkongx11 = {
 	224, 256, 3, 4
 };
 
+// Donkey Kong Remix (hack)
+// Hack of Donkey Kong Christmas Remix made to look like the original Donkey Kong Remix
+// from dkremix.com, it is NOT a dump of the kit.
+
+static struct BurnRomInfo dkremixRomDesc[] = {
+	{ "c_5et_g.bin",	0x01000, 0xba70b88b, 1 }, //  0 maincpu
+	{ "c_5ct_g.bin",	0x01000, 0x5ec461ec, 1 }, //  1
+	{ "c_5bt_g.bin",	0x01000, 0x1c97d324, 1 }, //  2
+	{ "c_5at_g.bin",	0x01000, 0xb9005ac0, 1 }, //  3
+
+	{ "dkremix.bin",    0x10000, 0xf47c13aa, 2 }, //  4 braze
+
+	{ "s_3i_b.bin",		0x00800, 0x45a4ed06, 3 }, //  5 soundcpu
+	{ "s_3j_b.bin",		0x00800, 0x4743fe92, 3 }, //  6
+
+	{ "dkremix.5h",		0x00800, 0xfc82b069, 4 }, //  7 gfx1
+	{ "dkremix.3pt",	0x00800, 0xfe32ee33, 4 }, //  8
+
+	{ "dkremix.4m",		0x00800, 0x3d9784d7, 5 }, //  9 gfx2
+	{ "dkremix.4n",		0x00800, 0x084c960a, 5 }, // 10
+	{ "dkremix.4r",		0x00800, 0x9ac5d874, 5 }, // 11
+	{ "dkremix.4s",		0x00800, 0x74a5d517, 5 }, // 12
+
+	{ "c-2k.bpr",		0x00100, 0xe273ede5, 6 }, // 13 proms
+	{ "c-2j.bpr",		0x00100, 0xd6412358, 6 }, // 14
+	{ "v-5e.bpr",		0x00100, 0xb869b8f5, 6 }, // 15
+};
+
+STD_ROM_PICK(dkremix)
+STD_ROM_FN(dkremix)
+
+struct BurnDriver BurnDrvDkremix = {
+	"dkremix", "dkong", NULL, "dkong", "2023",
+	"Donkey Kong Remix (Hack)\0", NULL, "hack", "Miscellaneous",
+	NULL, NULL, NULL, NULL,
+	BDF_GAME_WORKING | BDF_CLONE | BDF_HACK | BDF_ORIENTATION_VERTICAL | BDF_ORIENTATION_FLIPPED | BDF_HISCORE_SUPPORTED, 2, HARDWARE_MISC_PRE90S, GBF_PLATFORM | GBF_ACTION, 0,
+	NULL, dkremixRomInfo, dkremixRomName, NULL, NULL, DkongSampleInfo, DkongSampleName, DkongInputInfo, DkongNoDipDIPInfo,
+	dkongxInit, DrvExit, DrvFrame, dkongDraw, DrvScan, &DrvRecalc, 0x100,
+	224, 256, 3, 4
+};
 
 // Donkey Kong Christmas Remix (Hack)
 
