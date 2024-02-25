@@ -937,8 +937,8 @@ static struct BurnInputInfo ScrossInputList[] = {
 	A("P1 Steering",	BIT_ANALOG_REL, &Analog[0],		"p1 x-axis"	),
 	A("P1 Accelerate",	BIT_ANALOG_REL, &Analog[1],		"p1 y-axis"	),
 
-	{"P2 Coin",			BIT_DIGITAL,	DrvJoy5 + 3,	"p2 coin"	},
-	{"P2 Start",		BIT_DIGITAL,	DrvJoy5 + 5,	"p2 start"	},
+	{"P2 Coin",			BIT_DIGITAL,	DrvJoy13 + 2,	"p2 coin"	},
+	{"P2 Start",		BIT_DIGITAL,	DrvJoy13 + 4,	"p2 start"	},
 	{"P2 Attack",		BIT_DIGITAL,	DrvJoy9 + 0,	"p2 fire 1"	},
 	{"P2 Wheelie",		BIT_DIGITAL,	DrvJoy9 + 1,	"p2 fire 2"	},
 	{"P2 Brake",		BIT_DIGITAL,	DrvJoy9 + 2,	"p2 fire 3"	},
@@ -968,16 +968,19 @@ static struct BurnInputInfo TitlefInputList[] = {
 	{"P1 Right Stick Left",	BIT_DIGITAL,	DrvJoy2 + 7,	"p3 left"	},
 	{"P1 Right Stick Right",BIT_DIGITAL,	DrvJoy2 + 6,	"p3 right"	},
 
-	{"P2 Coin",				BIT_DIGITAL,	DrvJoy5 + 3,	"p2 coin"	},
+	{"P2 Coin",				BIT_DIGITAL,	DrvJoy13 + 2,	"p2 coin"	},
 	{"P2 Start",			BIT_DIGITAL,	DrvJoy5 + 5,	"p2 start"	},
-	{"P2 Left Stick Up",	BIT_DIGITAL,	DrvJoy7 + 5,	"p2 up"		},
-	{"P2 Left Stick Down",	BIT_DIGITAL,	DrvJoy7 + 4,	"p2 down"	},
-	{"P2 Left Stick Left",	BIT_DIGITAL,	DrvJoy7 + 7,	"p2 left"	},
-	{"P2 Left Stick Right",	BIT_DIGITAL,	DrvJoy7 + 6,	"p2 right"	},
-	{"P2 Right Stick Up",	BIT_DIGITAL,	DrvJoy8 + 5,	"p4 up"		},
-	{"P2 Right Stick Down",	BIT_DIGITAL,	DrvJoy8 + 4,	"p4 down"	},
-	{"P2 Right Stick Left",	BIT_DIGITAL,	DrvJoy8 + 7,	"p4 left"	},
-	{"P2 Right Stick Right",BIT_DIGITAL,	DrvJoy8 + 6,	"p4 right"	},
+	{"P2 Left Stick Up",	BIT_DIGITAL,	DrvJoy9 + 5,	"p2 up"		},
+	{"P2 Left Stick Down",	BIT_DIGITAL,	DrvJoy9 + 4,	"p2 down"	},
+	{"P2 Left Stick Left",	BIT_DIGITAL,	DrvJoy9 + 7,	"p2 left"	},
+	{"P2 Left Stick Right",	BIT_DIGITAL,	DrvJoy9 + 6,	"p2 right"	},
+	{"P2 Right Stick Up",	BIT_DIGITAL,	DrvJoy10 + 5,	"p4 up"		},
+	{"P2 Right Stick Down",	BIT_DIGITAL,	DrvJoy10 + 4,	"p4 down"	},
+	{"P2 Right Stick Left",	BIT_DIGITAL,	DrvJoy10 + 7,	"p4 left"	},
+	{"P2 Right Stick Right",BIT_DIGITAL,	DrvJoy10 + 6,	"p4 right"	},
+
+	{"P3 Start",			BIT_DIGITAL,	DrvJoy13 + 4,	"p3 start"	},
+	{"P4 Start",			BIT_DIGITAL,	DrvJoy13 + 5,	"p4 start"	},
 
 	{"Reset",				BIT_DIGITAL,	&DrvReset,		"reset"		},
 	{"Service Mode",		BIT_DIGITAL,	DrvJoy5 + 1,	"diag"		},
@@ -1110,7 +1113,7 @@ DEFAULT_UNUSED_DIPS_WHEEL(F1lap, 0x0d)
 DEFAULT_UNUSED_DIPS_MS_WHEEL(Orunners, 0x19)
 DEFAULT_UNUSED_DIPS_MS(Harddunk, 0x3d)
 DEFAULT_UNUSED_DIPS_MS(Scross, 0x13)
-DEFAULT_UNUSED_DIPS_MS(Titlef, 0x19)
+DEFAULT_UNUSED_DIPS_MS(Titlef, 0x1b)
 
 static INT32 irq_callback(INT32 /*state*/)
 {
@@ -4291,7 +4294,7 @@ static INT32 DrvFrame()
 
 		if (is_scross) { // button 2 (wheelie) is active high
 			DrvInputs[0] = 0xfd;
-			DrvInputs[1] = 0xfd;
+			DrvInputs[8] = 0xfd;
 		}
 
 		for (INT32 i = 0; i < 16; i++) {
