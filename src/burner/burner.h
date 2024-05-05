@@ -257,6 +257,7 @@ INT32 __cdecl ZipLoadOneFile(char* arcName, const char* fileName, void** Dest, I
 // retro_romdata.cpp
 
 extern TCHAR szRomdataName[MAX_PATH];
+void IpsPatchExit();
 
 // bzip.cpp
 
