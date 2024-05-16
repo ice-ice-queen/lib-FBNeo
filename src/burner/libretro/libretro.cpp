@@ -485,7 +485,11 @@ void retro_set_environment(retro_environment_t cb)
 		{ "Nintendo Entertainment System", "nes", subsystem_rom, 1, RETRO_GAME_TYPE_NES },
 		{ "Nintendo Family Disk System", "fds", subsystem_rom, 1, RETRO_GAME_TYPE_FDS },
 		{ "Sega GameGear", "gg", subsystem_rom, 1, RETRO_GAME_TYPE_GG },
-		{ "Sega Master System", "sms", subsystem_rom, 1, RETRO_GAME_TYPE_SMS },
+		{ "Sega 
+      
+      
+      
+      System", "sms", subsystem_rom, 1, RETRO_GAME_TYPE_SMS },
 		{ "Sega Megadrive", "md", subsystem_rom, 1, RETRO_GAME_TYPE_MD },
 		{ "Sega SG-1000", "sg1k", subsystem_rom, 1, RETRO_GAME_TYPE_SG1K },
 		{ "SNK Neo Geo Pocket", "ngp", subsystem_rom, 1, RETRO_GAME_TYPE_NGP },
@@ -938,7 +942,7 @@ static void locate_archive(std::vector<located_archive>& pathList, const char* c
 			g_find_list_path.push_back(located_archive());
 			located_archive* located = &g_find_list_path.back();
 			located->path = path;
-			located->ignoreCrc = false;
+			located->ignoreCrc = true;
 			ZipClose();
 			HandleMessage(RETRO_LOG_INFO, "[FBNeo] Romset found at %s\n", path);
 		}
@@ -958,7 +962,7 @@ static void locate_archive(std::vector<located_archive>& pathList, const char* c
 				g_find_list_path.push_back(located_archive());
 				located_archive* located = &g_find_list_path.back();
 				located->path = path;
-				located->ignoreCrc = false;
+				located->ignoreCrc = true;
 				ZipClose();
 				HandleMessage(RETRO_LOG_INFO, "[FBNeo] Romset found at %s\n", path);
 			}
@@ -975,7 +979,7 @@ static void locate_archive(std::vector<located_archive>& pathList, const char* c
 			g_find_list_path.push_back(located_archive());
 			located_archive* located = &g_find_list_path.back();
 			located->path = path;
-			located->ignoreCrc = false;
+			located->ignoreCrc = true;
 			ZipClose();
 			HandleMessage(RETRO_LOG_INFO, "[FBNeo] Romset found at %s\n", path);
 		}
@@ -991,7 +995,7 @@ static void locate_archive(std::vector<located_archive>& pathList, const char* c
 			g_find_list_path.push_back(located_archive());
 			located_archive* located = &g_find_list_path.back();
 			located->path = path;
-			located->ignoreCrc = false;
+			located->ignoreCrc = true;
 			ZipClose();
 			HandleMessage(RETRO_LOG_INFO, "[FBNeo] Romset found at %s\n", path);
 		}
@@ -1010,7 +1014,7 @@ static void locate_archive(std::vector<located_archive>& pathList, const char* c
 			g_find_list_path.push_back(located_archive());
 			located_archive* located = &g_find_list_path.back();
 			located->path = path;
-			located->ignoreCrc = false;
+			located->ignoreCrc = true;
 			ZipClose();
 			HandleMessage(RETRO_LOG_INFO, "[FBNeo] Romset found at %s\n", path);
 		}
@@ -1030,7 +1034,7 @@ static void locate_archive(std::vector<located_archive>& pathList, const char* c
 				g_find_list_path.push_back(located_archive());
 				located_archive* located = &g_find_list_path.back();
 				located->path = path;
-				located->ignoreCrc = false;
+				located->ignoreCrc = true;
 				ZipClose();
 				HandleMessage(RETRO_LOG_INFO, "[FBNeo] Romset found at %s\n", path);
 			}
@@ -1055,7 +1059,7 @@ static void locate_archive(std::vector<located_archive>& pathList, const char* c
 				g_find_list_path.push_back(located_archive());
 				located_archive* located = &g_find_list_path.back();
 				located->path = path;
-				located->ignoreCrc = false;
+				located->ignoreCrc = true;
 				ZipClose();
 				HandleMessage(RETRO_LOG_INFO, "[FBNeo] Romset found at %s\n", path);
 			}
@@ -1075,7 +1079,7 @@ static void locate_archive(std::vector<located_archive>& pathList, const char* c
 					g_find_list_path.push_back(located_archive());
 					located_archive* located = &g_find_list_path.back();
 					located->path = path;
-					located->ignoreCrc = false;
+					located->ignoreCrc = true;
 					ZipClose();
 					HandleMessage(RETRO_LOG_INFO, "[FBNeo] Romset found at %s\n", path);
 				}
