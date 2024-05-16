@@ -296,6 +296,54 @@ INT32 reset_ipses_from_variables()
 	return nRet;
 }
 
+static void prepare_ips_data(const char *filename, char* drvName)
+{
+	uint32_t nActivePatches = 0;
+	FILE* fp = NULL;
+
+	fp = fopen(filename, "rb");
+	if (fp == NULL)
+	{
+		perror("Error opening file");
+		return;
+	}
+
+	char line[256];
+	while (fgets(line, sizeof(line), fp))
+	{
+
+		line[strcspn(line, "\r")] = 0;
+		line[strcspn(line, "\n")] = 0;
+		size_t len = strlen(line);
+
+		if (len > 4 && strstr(&line[len - 4], ".dat") != NULL) {
+			_stprintf(pszIpsActivePatches[nActivePatches++], _T("%s%s%c%s"),
+					szAppIpsesPath,
+					drvName,
+					PATH_DEFAULT_SLASH_C(),
+					line);
+			continue;
+		} else if (strncmp(line, "RomName:", 8) == 0 || strncmp(line, "RomName：", 9) == 0) {
+			char *colon = strchr(line, ':');
+			if (colon == NULL) {
+				colon = &line[10];
+			} else {
+				colon++;
+			}
+			if (colon != NULL)
+			{
+				while (!isalpha(*(colon)) && !isdigit(*(colon)))
+					colon++;
+				strcpy(drvName, colon);
+			}
+			continue;
+		}
+	}
+	fclose(fp);
+
+	HandleMessage(RETRO_LOG_INFO, "Got the patched %d Game driver %s\n", nActivePatches, drvName);
+}
+
 static INT32 GetIpsNumActivePatches()
 {
 	if (NULL == pszIpsActivePatches)
