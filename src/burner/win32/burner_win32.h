@@ -122,7 +122,6 @@ extern bool bMonitorAutoCheck;
 
 // Used for the load/save dialog in commdlg.h
 extern TCHAR szChoice[MAX_PATH];					// File chosen by the user
-extern TCHAR szRomdataName[MAX_PATH];
 extern OPENFILENAME ofn;
 
 // Used to convert strings when possibly needed
@@ -507,7 +506,6 @@ INT32 GetIpsNumPatches();
 void LoadIpsActivePatches();
 INT32 GetIpsNumActivePatches();
 INT32 IpsManagerCreate(HWND hParentWND);
-void IpsPatchExit();
 
 // localise_download.cpp
 int LocaliseDownloadCreate(HWND hParentWND);
