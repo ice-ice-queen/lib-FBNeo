@@ -470,7 +470,7 @@ void retro_set_environment(retro_environment_t cb)
 
 	// Subsystem (needs to be called now, or it won't work on command line)
 	static const struct retro_subsystem_rom_info subsystem_rom[] = {
-		{ "Rom", "zip|7z|dat", true, true, true, NULL, 0 },
+		{ "Rom", "zip|7z|dat|hak", true, true, true, NULL, 0 },
 	};
 	static const struct retro_subsystem_rom_info subsystem_iso[] = {
 		{ "Iso", "ccd|cue", true, true, true, NULL, 0 },
@@ -485,11 +485,7 @@ void retro_set_environment(retro_environment_t cb)
 		{ "Nintendo Entertainment System", "nes", subsystem_rom, 1, RETRO_GAME_TYPE_NES },
 		{ "Nintendo Family Disk System", "fds", subsystem_rom, 1, RETRO_GAME_TYPE_FDS },
 		{ "Sega GameGear", "gg", subsystem_rom, 1, RETRO_GAME_TYPE_GG },
-		{ "Sega 
-      
-      
-      
-      System", "sms", subsystem_rom, 1, RETRO_GAME_TYPE_SMS },
+		{ "Sega Master System", "sms", subsystem_rom, 1, RETRO_GAME_TYPE_SMS },
 		{ "Sega Megadrive", "md", subsystem_rom, 1, RETRO_GAME_TYPE_MD },
 		{ "Sega SG-1000", "sg1k", subsystem_rom, 1, RETRO_GAME_TYPE_SG1K },
 		{ "SNK Neo Geo Pocket", "ngp", subsystem_rom, 1, RETRO_GAME_TYPE_NGP },
@@ -517,7 +513,7 @@ void retro_get_system_info(struct retro_system_info *info)
 	info->library_version = strdup(library_version);
 	info->need_fullpath = true;
 	info->block_extract = true;
-	info->valid_extensions = "zip|7z|cue|ccd|dat";
+	info->valid_extensions = "zip|7z|cue|ccd|dat|hak";
 
 	free(library_version);
 }
@@ -2294,6 +2290,16 @@ static int retro_dat_romset_path(const struct retro_game_info* info, char* pszRo
 				strcpy(szRomset, ++pszTmp);				// romset of ips
 		}
 
+		sprintf(pszRomsetPath, "%s%c%s", szDatDir, PATH_DEFAULT_SLASH_C(), szRomset);
+	}
+	else if (0 == strcmp(strrchr(info->path, '.'), ".hak"))
+	{
+		char szDatDir[MAX_PATH] = { 0 }, szRomset[100] = { 0 };
+
+		strcpy(szDatDir, info->path);
+		szRomset = prepare_ips_data(szDatDir)
+
+		nRet = 2;
 		sprintf(pszRomsetPath, "%s%c%s", szDatDir, PATH_DEFAULT_SLASH_C(), szRomset);
 	}
 	else
