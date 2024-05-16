@@ -2297,7 +2297,8 @@ static int retro_dat_romset_path(const struct retro_game_info* info, char* pszRo
 		char szDatDir[MAX_PATH] = { 0 }, szRomset[100] = { 0 };
 
 		strcpy(szDatDir, info->path);
-		szRomset = prepare_ips_data(szDatDir)
+		
+		prepare_ips_data(szDatDir, szRomset)
 
 		nRet = 2;
 		sprintf(pszRomsetPath, "%s%c%s", szDatDir, PATH_DEFAULT_SLASH_C(), szRomset);
