@@ -322,9 +322,12 @@ INT32 apply_ipses_from_variables()
 	return nRet;
 }
 
-static void prepare_ips_data(const char *filename, char* drvName)
+#define MAX_PATH_LENGTH 256
+#define MAX_DAT_FILES 100
+
+void prepare_ips_data(const char *filename, char *drvName)
 {
-	uint32_t nActivePatches = 0;
+	
 	FILE* fp = NULL;
 
 	fp = fopen(filename, "rb");
@@ -334,20 +337,24 @@ static void prepare_ips_data(const char *filename, char* drvName)
 		return;
 	}
 
-	char line[256];
+	char line[MAX_PATH_LENGTH];
+	char *datFiles[MAX_DAT_FILES];
+	uint32_t nActivePatches = 0;
+
 	while (fgets(line, sizeof(line), fp))
 	{
-
 		line[strcspn(line, "\r")] = 0;
 		line[strcspn(line, "\n")] = 0;
 		size_t len = strlen(line);
 
-		if (len > 4 && strstr(&line[len - 4], ".dat") != NULL) {
-			_stprintf(pszIpsActivePatches[nActivePatches++], _T("%s%s%c%s"),
-					szAppIpsesPath,
-					drvName,
-					PATH_DEFAULT_SLASH_C(),
-					line);
+		if (len > 4 && strcmp(&line[len - 4], ".dat") == 0) {
+			if (nActivePatches < MAX_DAT_FILES) {
+                // 分配内存并存储路径
+                datFiles[nActivePatches] = strdup(line);
+                nActivePatches++;
+            } else {
+                perror("Maximum number of .dat files exceeded.\n");
+            }
 			continue;
 		} else if (strncmp(line, "RomName:", 8) == 0 || strncmp(line, "RomName：", 9) == 0) {
 			char *colon = strchr(line, ':');
@@ -366,6 +373,29 @@ static void prepare_ips_data(const char *filename, char* drvName)
 		}
 	}
 	fclose(fp);
+
+	if (nActivePatches > 0) {
+		IpsPatchExit();
+		pszIpsActivePatches = (TCHAR**)malloc(nActivePatches * sizeof(TCHAR*));
+	}
+
+	// 处理所有 .dat 文件路径
+	INT32 nActive = 0;
+	TCHAR tmpPath[MAX_PATH] = { 0 };
+    for (int i = 0; i < nActivePatches; i++) {
+		HandleMessage(RETRO_LOG_INFO, "line dat : %s \n", datFiles[i]);
+		_stprintf(tmpPath, _T("%s%s%c%s"),
+					szAppIpsesPath, drvName, PATH_DEFAULT_SLASH_C(), datFiles[i]);
+        if (NULL != pszIpsActivePatches)
+		{
+			pszIpsActivePatches[nActive] = (TCHAR*)malloc(MAX_PATH * sizeof(TCHAR));
+			memset(pszIpsActivePatches[nActive], 0, MAX_PATH * sizeof(TCHAR));
+			_tcscpy(pszIpsActivePatches[nActive], tmpPath);
+			nActive++;
+		}
+        // 处理完成后释放内存
+        free(datFiles[i]);
+    }
 
 	HandleMessage(RETRO_LOG_INFO, "Got the patched %d Game driver %s\n", nActivePatches, drvName);
 }

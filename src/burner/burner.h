@@ -262,6 +262,7 @@ extern TCHAR szRomdataName[MAX_PATH];
 
 void IpsPatchInit();
 void IpsPatchExit();
+void prepare_ips_data(const char *filename, char *drvName);
 
 // bzip.cpp
 

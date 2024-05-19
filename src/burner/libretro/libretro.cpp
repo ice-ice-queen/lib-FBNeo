@@ -2297,13 +2297,31 @@ static int retro_dat_romset_path(const struct retro_game_info* info, char* pszRo
 	}
 	else if (0 == strcmp(strrchr(info->path, '.'), ".hak"))
 	{
-		char szDatDir[MAX_PATH] = { 0 }, szRomset[100] = { 0 };
+		char szDatDir[MAX_PATH] = { 0 }, szRomset[100] = { 0 }, * pszTmp = NULL;
 
 		strcpy(szDatDir, info->path);
 		
-		prepare_ips_data(szDatDir, szRomset)
+		const char *dir = NULL;
+		// If system directory is defined use it, ...
+		if (environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &dir) && dir) {
+			memcpy(g_system_dir, dir, sizeof(g_system_dir));
+			HandleMessage(RETRO_LOG_INFO, "Setting system dir to %s\n", g_system_dir);
+		} else {
+			// ... otherwise use rom directory
+			strncpy(g_system_dir, g_rom_dir, sizeof(g_system_dir));
+			HandleMessage(RETRO_LOG_WARN, "System dir not defined => use roms dir %s\n", g_system_dir);
+		}
+		
+		snprintf_nowarn(szAppIpsesPath, sizeof(szAppIpsesPath), "%s%cfbneo%cips%c", g_system_dir, PATH_DEFAULT_SLASH_C(), PATH_DEFAULT_SLASH_C(), PATH_DEFAULT_SLASH_C());
+		
+		prepare_ips_data(szDatDir, szRomset);
 
 		nRet = 2;
+		pszTmp = find_last_slash(szDatDir);
+
+		if (NULL != pszTmp)
+			pszTmp[0] = '\0';
+
 		sprintf(pszRomsetPath, "%s%c%s", szDatDir, PATH_DEFAULT_SLASH_C(), szRomset);
 	}
 	else
