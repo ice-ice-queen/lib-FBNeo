@@ -323,12 +323,13 @@ INT32 apply_ipses_from_variables()
 #define MAX_PATH_LENGTH 256
 #define MAX_DAT_FILES 100
 
-void prepare_ips_data(const char *filename, char *drvName)
+void prepare_ips_data(const char *filePath, const char *fileDir, char *drvName)
 {
-	
+	IpsPatchExit();
+
 	FILE* fp = NULL;
 
-	fp = fopen(filename, "rb");
+	fp = fopen(filePath, "rb");
 	if (fp == NULL)
 	{
 		perror("Error opening file");
@@ -337,7 +338,6 @@ void prepare_ips_data(const char *filename, char *drvName)
 
 	char line[MAX_PATH_LENGTH];
 	char *datFiles[MAX_DAT_FILES];
-	uint32_t nActivePatches = 0;
 
 	while (fgets(line, sizeof(line), fp))
 	{
@@ -346,10 +346,9 @@ void prepare_ips_data(const char *filename, char *drvName)
 		size_t len = strlen(line);
 
 		if (len > 4 && strcmp(&line[len - 4], ".dat") == 0) {
-			if (nActivePatches < MAX_DAT_FILES) {
-                // 分配内存并存储路径
-                datFiles[nActivePatches] = strdup(line);
-                nActivePatches++;
+			if (nActiveArray < MAX_DAT_FILES) {
+                datFiles[nActiveArray] = strdup(line);
+                nActiveArray++;
             } else {
                 perror("Maximum number of .dat files exceeded.\n");
             }
@@ -372,30 +371,42 @@ void prepare_ips_data(const char *filename, char *drvName)
 	}
 	fclose(fp);
 
-	if (nActivePatches > 0) {
-		IpsPatchExit();
-		pszIpsActivePatches = (TCHAR**)malloc(nActivePatches * sizeof(TCHAR*));
+	const INT32 nActive = nActiveArray; nActiveArray = 0;
+
+	if (nActive > 0) {
+		pszIpsActivePatches = (TCHAR**)malloc(nActive * sizeof(TCHAR*));
 	}
 
-	// 处理所有 .dat 文件路径
-	INT32 nActive = 0;
 	TCHAR tmpPath[MAX_PATH] = { 0 };
-    for (int i = 0; i < nActivePatches; i++) {
+    for (int i = 0; i < nActive; i++) {
 		HandleMessage(RETRO_LOG_INFO, "line dat : %s \n", datFiles[i]);
 		_stprintf(tmpPath, _T("%s%s%c%s"),
 					szAppIpsesPath, drvName, PATH_DEFAULT_SLASH_C(), datFiles[i]);
+        FILE* file = _tfopen(tmpPath, _T("r"));
+        if (file) {
+            fclose(file);
+        } else {
+			_stprintf(tmpPath, _T("%s%c%s%c%s%c%s"),
+                      fileDir,
+                      PATH_DEFAULT_SLASH_C(),
+                      _T("ips"),
+                      PATH_DEFAULT_SLASH_C(),
+                      drvName,
+                      PATH_DEFAULT_SLASH_C(),
+                      datFiles[i]);
+		}
+
         if (NULL != pszIpsActivePatches)
 		{
-			pszIpsActivePatches[nActive] = (TCHAR*)malloc(MAX_PATH * sizeof(TCHAR));
-			memset(pszIpsActivePatches[nActive], 0, MAX_PATH * sizeof(TCHAR));
-			_tcscpy(pszIpsActivePatches[nActive], tmpPath);
-			nActive++;
+			pszIpsActivePatches[nActiveArray] = (TCHAR*)malloc(MAX_PATH * sizeof(TCHAR));
+			memset(pszIpsActivePatches[nActiveArray], 0, MAX_PATH * sizeof(TCHAR));
+			_tcscpy(pszIpsActivePatches[nActiveArray], tmpPath);
+			nActiveArray++;
 		}
-        // 处理完成后释放内存
         free(datFiles[i]);
     }
 
-	HandleMessage(RETRO_LOG_INFO, "Got the patched %d Game driver %s\n", nActivePatches, drvName);
+	HandleMessage(RETRO_LOG_INFO, "Got the patched %d Game driver %s\n", nActiveArray, drvName);
 }
 
 static INT32 GetIpsNumActivePatches()
