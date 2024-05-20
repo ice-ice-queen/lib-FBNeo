@@ -2297,8 +2297,9 @@ static int retro_dat_romset_path(const struct retro_game_info* info, char* pszRo
 	}
 	else if (0 == strcmp(strrchr(info->path, '.'), ".hak"))
 	{
-		char szDatDir[MAX_PATH] = { 0 }, szRomset[100] = { 0 }, * pszTmp = NULL;
+		char szDatPath[MAX_PATH] = { 0 }, szDatDir[MAX_PATH] = { 0 }, szRomset[100] = { 0 }, * pszTmp = NULL;
 
+		strcpy(szDatPath, info->path);
 		strcpy(szDatDir, info->path);
 		
 		const char *dir = NULL;
@@ -2314,14 +2315,12 @@ static int retro_dat_romset_path(const struct retro_game_info* info, char* pszRo
 		
 		snprintf_nowarn(szAppIpsesPath, sizeof(szAppIpsesPath), "%s%cfbneo%cips%c", g_system_dir, PATH_DEFAULT_SLASH_C(), PATH_DEFAULT_SLASH_C(), PATH_DEFAULT_SLASH_C());
 		
-		prepare_ips_data(szDatDir, szRomset);
-
 		nRet = 2;
 		pszTmp = find_last_slash(szDatDir);
-
 		if (NULL != pszTmp)
 			pszTmp[0] = '\0';
-
+		
+		prepare_ips_data(szDatPath, szDatDir, szRomset);
 		sprintf(pszRomsetPath, "%s%c%s", szDatDir, PATH_DEFAULT_SLASH_C(), szRomset);
 	}
 	else
