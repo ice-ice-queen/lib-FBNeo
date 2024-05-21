@@ -664,13 +664,18 @@ static void DoPatchGame(const char* patch_name, char* game_name, UINT32 crc, UIN
 				}
 				else
 				{
-					sprintf(
-						ips_path,																// ./system/fbneo/ips/drvname_dir/(sub_dir/)ipses.ips
-						"%s%s%c%s%s",
-						szAppIpsesPath,															// ./system/fbneo/ips/
-						BurnDrvGetTextA(DRV_NAME), PATH_DEFAULT_SLASH_C(),						// drvname_dir/
-						ips_name, (has_ext) ? "" : IPS_EXT										// (sub_dir/)ipses.ips
-					);
+					// sprintf(
+					// 	ips_path,																// ./system/fbneo/ips/drvname_dir/(sub_dir/)ipses.ips
+					// 	"%s%s%c%s%s",
+					// 	szAppIpsesPath,															// ./system/fbneo/ips/
+					// 	BurnDrvGetTextA(DRV_NAME), PATH_DEFAULT_SLASH_C(),						// drvname_dir/
+					// 	ips_name, (has_ext) ? "" : IPS_EXT										// (sub_dir/)ipses.ips
+					// );
+					
+					strcpy(ips_dir, patch_name);	
+					if (NULL != (pszTmp = strrchr(ips_dir, PATH_DEFAULT_SLASH_C())))
+						pszTmp[1] = '\0';	
+					sprintf(ips_path, "%s%s%s", ips_dir, ips_name, (has_ext) ? "" : IPS_EXT);
 				}
 				PatchFile(ips_path, base, readonly);
 			}
