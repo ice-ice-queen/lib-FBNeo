@@ -320,59 +320,9 @@ INT32 apply_ipses_from_variables()
 	return nActiveArray;
 }
 
-#define MAX_PATH_LENGTH 256
-#define MAX_DAT_FILES 100
-
-void prepare_ips_data(const char *filePath, const char *fileDir, char *drvName)
+INT32 prepare_ips_data(const char *fileDir, char *drvName, char *datFiles[], INT32 nActive)
 {
-	IpsPatchExit();
-
-	FILE* fp = NULL;
-
-	fp = fopen(filePath, "rb");
-	if (fp == NULL)
-	{
-		perror("Error opening file");
-		return;
-	}
-
-	char line[MAX_PATH_LENGTH];
-	char *datFiles[MAX_DAT_FILES];
-
-	while (fgets(line, sizeof(line), fp))
-	{
-		line[strcspn(line, "\r")] = 0;
-		line[strcspn(line, "\n")] = 0;
-		size_t len = strlen(line);
-
-		if (len > 4 && strcmp(&line[len - 4], ".dat") == 0) {
-			if (nActiveArray < MAX_DAT_FILES) {
-                datFiles[nActiveArray] = strdup(line);
-                nActiveArray++;
-            } else {
-                perror("Maximum number of .dat files exceeded.\n");
-            }
-			continue;
-		} else if (strncmp(line, "RomName:", 8) == 0 || strncmp(line, "RomName：", 9) == 0) {
-			char *colon = strchr(line, ':');
-			if (colon == NULL) {
-				colon = &line[10];
-			} else {
-				colon++;
-			}
-			if (colon != NULL)
-			{
-				while (!isalpha(*(colon)) && !isdigit(*(colon)))
-					colon++;
-				strcpy(drvName, colon);
-			}
-			continue;
-		}
-	}
-	fclose(fp);
-
-	const INT32 nActive = nActiveArray; nActiveArray = 0;
-
+	nActiveArray = 0;
 	if (nActive > 0) {
 		pszIpsActivePatches = (TCHAR**)malloc(nActive * sizeof(TCHAR*));
 	}
@@ -407,6 +357,7 @@ void prepare_ips_data(const char *filePath, const char *fileDir, char *drvName)
     }
 
 	HandleMessage(RETRO_LOG_INFO, "Got the patched %d Game driver %s\n", nActiveArray, drvName);
+	return nActiveArray;
 }
 
 static INT32 GetIpsNumActivePatches()
