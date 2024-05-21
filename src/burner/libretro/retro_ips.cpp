@@ -664,6 +664,7 @@ static void DoPatchGame(const char* patch_name, char* game_name, UINT32 crc, UIN
 				}
 				else
 				{
+
 					// sprintf(
 					// 	ips_path,																// ./system/fbneo/ips/drvname_dir/(sub_dir/)ipses.ips
 					// 	"%s%s%c%s%s",
