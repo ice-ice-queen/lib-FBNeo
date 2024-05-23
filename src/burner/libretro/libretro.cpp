@@ -2378,7 +2378,7 @@ void deal_hack(const char *filePath, const char *fileDir, char *drvName)
 				strcpy(drvName, colon);
 			}
 		}
-		else if (strncmp(line, "RomData:", 8) == 0 || strncmp(line, "RomData", 9) == 0) 
+		else if (strncmp(line, "RomData:", 8) == 0 || strncmp(line, "RomData：", 9) == 0) 
 		{
 			char *colon = strchr(line, ':');
 			if (colon == NULL) {
