@@ -474,7 +474,7 @@ void retro_set_environment(retro_environment_t cb)
 
 	// Subsystem (needs to be called now, or it won't work on command line)
 	static const struct retro_subsystem_rom_info subsystem_rom[] = {
-		{ "Rom", "zip|7z|dat", true, true, true, NULL, 0 },
+		{ "Rom", "zip|7z|dat|hak", true, true, true, NULL, 0 },
 	};
 	static const struct retro_subsystem_rom_info subsystem_iso[] = {
 		{ "Iso", "ccd|cue", true, true, true, NULL, 0 },
@@ -517,7 +517,7 @@ void retro_get_system_info(struct retro_system_info *info)
 	info->library_version = strdup(library_version);
 	info->need_fullpath = true;
 	info->block_extract = true;
-	info->valid_extensions = "zip|7z|cue|ccd|dat";
+	info->valid_extensions = "zip|7z|cue|ccd|dat|hak";
 
 	free(library_version);
 }
@@ -2039,6 +2039,9 @@ static bool retro_load_game_common()
 
 		bIsNeogeoCartGame = ((BurnDrvGetHardwareCode() & HARDWARE_PUBLIC_MASK) == HARDWARE_SNK_NEOGEO);
 
+		// PGM++
+		bIsPgmCartGame = ((BurnDrvGetHardwareCode() & HARDWARE_PUBLIC_MASK) == HARDWARE_IGS_PGM);
+
 		// Define nMaxPlayers early;
 		nMaxPlayers = BurnDrvGetMaxPlayers();
 
@@ -2242,6 +2245,19 @@ end:
 
 static int retro_dat_romset_path(const struct retro_game_info* info, char* pszRomsetPath)
 {
+	const char *dir = NULL;
+	// If system directory is defined use it, ...
+	if (environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &dir) && dir) {
+		memcpy(g_system_dir, dir, sizeof(g_system_dir));
+		HandleMessage(RETRO_LOG_INFO, "Setting system dir to %s\n", g_system_dir);
+	} else {
+		// ... otherwise use rom directory
+		strncpy(g_system_dir, g_rom_dir, sizeof(g_system_dir));
+		HandleMessage(RETRO_LOG_WARN, "System dir not defined => use roms dir %s\n", g_system_dir);
+	}
+	snprintf_nowarn(szAppIpsesPath, sizeof(szAppIpsesPath), "%s%cfbneo%cips%c", g_system_dir, PATH_DEFAULT_SLASH_C(), PATH_DEFAULT_SLASH_C(), PATH_DEFAULT_SLASH_C());
+	snprintf_nowarn(szAppRomdatasPath, sizeof(szAppRomdatasPath), "%s%cfbneo%cromdata%c", g_system_dir, PATH_DEFAULT_SLASH_C(), PATH_DEFAULT_SLASH_C(), PATH_DEFAULT_SLASH_C());
+	
 	INT32 nRet = 0;	// 1: romdata; 2: ips;
 
 	if (0 == strcmp(strrchr(info->path, '.'), ".dat"))
@@ -2279,10 +2295,129 @@ static int retro_dat_romset_path(const struct retro_game_info* info, char* pszRo
 
 		_stprintf(pszRomsetPath, _T("%s%c%s"), szDatDir, PATH_DEFAULT_SLASH_C(), szRomset);
 	}
+	else if (0 == strcmp(strrchr(info->path, '.'), ".hak"))
+	{
+		char szDatPath[MAX_PATH] = { 0 }, szDatDir[MAX_PATH] = { 0 }, szRomset[100] = { 0 }, * pszTmp = NULL;
+
+		strcpy(szDatPath, info->path);
+		strcpy(szDatDir, info->path);
+
+		pszTmp = find_last_slash(szDatDir);
+		if (NULL != pszTmp)
+			pszTmp[0] = '\0';
+		
+		deal_hack(szDatPath, szDatDir, szRomset);
+		
+		sprintf(pszRomsetPath, "%s%c%s", szDatDir, PATH_DEFAULT_SLASH_C(), szRomset);
+	}
 	else
+	{
+		char tmp_name[128], tmpPath[MAX_PATH] = { 0 }, szDatDir[MAX_PATH] = { 0 };
+		extract_basename(tmp_name, info->path, sizeof(tmp_name), "");
+		extract_directory(szDatDir, info->path, sizeof(szDatDir));
+		_stprintf(tmpPath, _T("%s%c%s%s"),
+					szAppRomdatasPath, PATH_DEFAULT_SLASH_C(), tmp_name, ".dat");
+        FILE* file = _tfopen(tmpPath, _T("r"));
+        if (file) {
+        	fclose(file);
+			char szRomset[100] = { 0 }, * pszTmp = NULL;
+			memset(szRomdataName, 0, MAX_PATH);
+			strcpy(szRomdataName, tmpPath);
+			if (NULL != (pszTmp = RomdataGetDrvName()))		// romdata
+			{
+				nRet = 1;
+				strcpy(szRomset, pszTmp);					// romset of romdata
+			}
+			sprintf(pszRomsetPath, "%s%c%s", szDatDir, PATH_DEFAULT_SLASH_C(), szRomset);
+			return nRet;
+        }
+		
 		strcpy(pszRomsetPath, info->path);
+	}
 
 	return nRet;
+}
+
+#define MAX_PATH_LENGTH 256
+#define MAX_DAT_FILES 100
+
+void deal_hack(const char *filePath, const char *fileDir, char *drvName)
+{
+	FILE* fp = NULL;
+
+	fp = fopen(filePath, "rb");
+	if (fp == NULL)
+	{
+		perror("Error opening file");
+		return;
+	}
+
+	char line[MAX_PATH_LENGTH];
+	char *datFiles[MAX_DAT_FILES];
+	INT32 nActive = 0;
+	INT32 nIndex = -1,
+
+	while (fgets(line, sizeof(line), fp))
+	{
+		line[strcspn(line, "\r")] = 0;
+		line[strcspn(line, "\n")] = 0;
+		size_t len = strlen(line);
+
+		if (strncmp(line, "RomName:", 8) == 0 || strncmp(line, "RomName：", 9) == 0) 
+		{
+			char *colon = strchr(line, ':');
+			if (colon == NULL) {
+				colon = &line[10];
+			} else {
+				colon++;
+			}
+			if (colon != NULL)
+			{
+				while (!isalpha(*(colon)) && !isdigit(*(colon)))
+					colon++;
+				strcpy(drvName, colon);
+			}
+		}
+		else if (strncmp(line, "RomData:", 8) == 0 || strncmp(line, "RomData", 9) == 0) 
+		{
+			char *colon = strchr(line, ':');
+			if (colon == NULL) {
+				colon = &line[10];
+			} else {
+				colon++;
+			}
+			if (colon != NULL)
+			{
+				while (!isalpha(*(colon)) && !isdigit(*(colon)))
+					colon++;
+				memset(szRomdataName, 0, MAX_PATH);
+				// romdata 
+				_stprintf(szRomdataName, _T("%s%s"), szAppRomdatasPath, colon);
+				nIndex = 1;
+			}
+		}
+		else if (len > 4 && strcmp(&line[len - 4], ".dat") == 0) 
+		{
+			if (nActive < MAX_DAT_FILES) {
+                datFiles[nActive] = strdup(line);
+                nActive++;
+            } else {
+                perror("Maximum number of .dat files exceeded.\n");
+            }
+		}
+	}
+	fclose(fp);
+
+	INT32 nPatches = prepare_ips_data(fileDir, drvName, datFiles, nActive);
+
+	if (nPatches > 0)
+	{
+		IpsPatchInit();
+	}
+	if (-1 != nIndex)
+	{
+		RomDataInit();
+	}
 }
 
 bool retro_load_game(const struct retro_game_info *info)
