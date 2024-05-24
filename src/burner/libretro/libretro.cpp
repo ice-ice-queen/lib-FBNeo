@@ -220,11 +220,11 @@ INT32 CoreRomPathsLoad()
 	for (INT32 i = 0; i < DIRS_MAX; i++)
 		memset(CoreRomPaths[i], 0, MAX_PATH * sizeof(TCHAR));
 
-	snprintf_nowarn(szConfig, sizeof(szConfig), "%srom_path.opt", szAppPathDefPath);
+	_stprintf(szConfig, "%srom_path.opt", szAppPathDefPath);
 
 	if (NULL == (h = _tfopen(szConfig, _T("rt")))) {
 		memset(szConfig, 0, MAX_PATH * sizeof(TCHAR));
-		snprintf_nowarn(szConfig, sizeof(szConfig), "%s%crom_path.opt", g_rom_dir, PATH_DEFAULT_SLASH_C());
+		_stprintf(szConfig, "%s%crom_path.opt", g_rom_dir, PATH_DEFAULT_SLASH_C());
 
 		if (NULL == (h = _tfopen(szConfig, _T("rt"))))
 			return 1;
@@ -959,10 +959,7 @@ static void locate_archive(std::vector<located_archive>& pathList, const char* c
 		for (INT32 nType = 0; nType < TYPES_MAX; nType++)
 		{
 			memset(path, 0, sizeof(path));
-			snprintf_nowarn(
-				path, sizeof(path), "%s%c%s%c%s",
-				g_rom_dir, PATH_DEFAULT_SLASH_C(), szTypeEnum[0][nType], PATH_DEFAULT_SLASH_C(), romName
-			);
+			_stprintf(path, "%s%c%s%c%s", g_rom_dir, PATH_DEFAULT_SLASH_C(), szTypeEnum[0][nType], PATH_DEFAULT_SLASH_C(), romName);
 			if (ZipOpen(path) == 0)
 			{
 				g_find_list_path.push_back(located_archive());
@@ -998,10 +995,7 @@ static void locate_archive(std::vector<located_archive>& pathList, const char* c
 		for (INT32 nType = 0; nType < TYPES_MAX; nType++)
 		{
 			memset(path, 0, sizeof(path));
-			snprintf_nowarn(
-				path, sizeof(path), "%s%cfbneo%c%s%c%s",
-				g_system_dir, PATH_DEFAULT_SLASH_C(), PATH_DEFAULT_SLASH_C(), szTypeEnum[0][nType], PATH_DEFAULT_SLASH_C(), romName
-			);
+			_stprintf(path, "%s%cfbneo%c%s%c%s", g_system_dir, PATH_DEFAULT_SLASH_C(), PATH_DEFAULT_SLASH_C(), szTypeEnum[0][nType], PATH_DEFAULT_SLASH_C(), romName);
 			if (ZipOpen(path) == 0)
 			{
 				g_find_list_path.push_back(located_archive());
@@ -1040,6 +1034,9 @@ static void locate_archive(std::vector<located_archive>& pathList, const char* c
 			char* p = find_last_slash(CoreRomPaths[i]);
 			if ((NULL != p) && ('\0' == p[1])) p[0] = '\0';
 
+			// custom_dir/romName
+			memset(path, 0, sizeof(path));
+			_stprintf(path, "%s%c%s", CoreRomPaths[i], PATH_DEFAULT_SLASH_C(), romName);
 			if (ZipOpen(path) == 0)
 			{
 				g_find_list_path.push_back(located_archive());
@@ -1058,10 +1055,7 @@ static void locate_archive(std::vector<located_archive>& pathList, const char* c
 			for (INT32 nType = 0; nType < TYPES_MAX; nType++)
 			{
 				memset(path, 0, sizeof(path));
-				snprintf_nowarn(
-					path, sizeof(path), "%s%c%s%c%s",
-					CoreRomPaths[i], PATH_DEFAULT_SLASH_C(), szTypeEnum[0][nType], PATH_DEFAULT_SLASH_C(), romName
-				);
+				_stprintf(path, "%s%c%s%c%s", CoreRomPaths[i], PATH_DEFAULT_SLASH_C(), szTypeEnum[0][nType], PATH_DEFAULT_SLASH_C(), romName);
 				if (ZipOpen(path) == 0)
 				{
 					g_find_list_path.push_back(located_archive());
