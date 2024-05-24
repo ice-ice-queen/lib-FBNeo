@@ -2389,9 +2389,10 @@ static void deal_hack(const char *filePath, const char *fileDir, char *drvName)
 			{
 				while (!isalpha(*(colon)) && !isdigit(*(colon)))
 					colon++;
+				strcpy(drvName, colon);
 				memset(szRomdataName, 0, MAX_PATH);
 				// romdata 
-				_stprintf(szRomdataName, _T("%s%s"), szAppRomdatasPath, colon);
+				_stprintf(szRomdataName, _T("%s%s%s"), szAppRomdatasPath, drvName, ".dat");
 				nIndex = 1;
 			}
 		}
