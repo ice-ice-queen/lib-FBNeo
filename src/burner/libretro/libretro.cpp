@@ -199,6 +199,10 @@ static void extract_directory(char* buf, const char* path, size_t size);
 static bool retro_load_game_common();
 static void retro_incomplete_exit();
 
+#define MAX_PATH_LENGTH 256
+#define MAX_DAT_FILES 100
+static void deal_hack(const char *filePath, const char *fileDir, char *drvName);
+
 static int nDIPOffset;
 
 const int nConfigMinVersion = 0x020921;
@@ -2338,14 +2342,9 @@ static int retro_dat_romset_path(const struct retro_game_info* info, char* pszRo
 	return nRet;
 }
 
-#define MAX_PATH_LENGTH 256
-#define MAX_DAT_FILES 100
-
-void deal_hack(const char *filePath, const char *fileDir, char *drvName)
+static void deal_hack(const char *filePath, const char *fileDir, char *drvName)
 {
-	FILE* fp = NULL;
-
-	fp = fopen(filePath, "rb");
+	FILE* fp = fopen(filePath, "rb");
 	if (fp == NULL)
 	{
 		perror("Error opening file");
@@ -2355,7 +2354,7 @@ void deal_hack(const char *filePath, const char *fileDir, char *drvName)
 	char line[MAX_PATH_LENGTH];
 	char *datFiles[MAX_DAT_FILES];
 	INT32 nActive = 0;
-	INT32 nIndex = -1,
+	INT32 nIndex = -1;
 
 	while (fgets(line, sizeof(line), fp))
 	{
