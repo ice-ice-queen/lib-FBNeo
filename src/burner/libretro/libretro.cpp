@@ -216,11 +216,11 @@ INT32 CoreRomPathsLoad()
 	for (INT32 i = 0; i < DIRS_MAX; i++)
 		memset(CoreRomPaths[i], 0, MAX_PATH * sizeof(TCHAR));
 
-	snprintf_nowarn(szConfig, sizeof(szConfig), "%srom_path.opt", szAppPathDefPath);
+	_stprintf(szConfig, "%srom_path.opt", szAppPathDefPath);
 
 	if (NULL == (h = _tfopen(szConfig, _T("rt")))) {
 		memset(szConfig, 0, MAX_PATH * sizeof(TCHAR));
-		snprintf_nowarn(szConfig, sizeof(szConfig), "%s%crom_path.opt", g_rom_dir, PATH_DEFAULT_SLASH_C());
+		_stprintf(szConfig, "%s%crom_path.opt", g_rom_dir, PATH_DEFAULT_SLASH_C());
 
 		if (NULL == (h = _tfopen(szConfig, _T("rt"))))
 			return 1;
@@ -955,10 +955,7 @@ static void locate_archive(std::vector<located_archive>& pathList, const char* c
 		for (INT32 nType = 0; nType < TYPES_MAX; nType++)
 		{
 			memset(path, 0, sizeof(path));
-			snprintf_nowarn(
-				path, sizeof(path), "%s%c%s%c%s",
-				g_rom_dir, PATH_DEFAULT_SLASH_C(), szTypeEnum[0][nType], PATH_DEFAULT_SLASH_C(), romName
-			);
+			_stprintf(path, "%s%c%s%c%s", g_rom_dir, PATH_DEFAULT_SLASH_C(), szTypeEnum[0][nType], PATH_DEFAULT_SLASH_C(), romName);
 			if (ZipOpen(path) == 0)
 			{
 				g_find_list_path.push_back(located_archive());
@@ -994,10 +991,7 @@ static void locate_archive(std::vector<located_archive>& pathList, const char* c
 		for (INT32 nType = 0; nType < TYPES_MAX; nType++)
 		{
 			memset(path, 0, sizeof(path));
-			snprintf_nowarn(
-				path, sizeof(path), "%s%cfbneo%c%s%c%s",
-				g_system_dir, PATH_DEFAULT_SLASH_C(), PATH_DEFAULT_SLASH_C(), szTypeEnum[0][nType], PATH_DEFAULT_SLASH_C(), romName
-			);
+			_stprintf(path, "%s%cfbneo%c%s%c%s", g_system_dir, PATH_DEFAULT_SLASH_C(), PATH_DEFAULT_SLASH_C(), szTypeEnum[0][nType], PATH_DEFAULT_SLASH_C(), romName);
 			if (ZipOpen(path) == 0)
 			{
 				g_find_list_path.push_back(located_archive());
@@ -1036,6 +1030,9 @@ static void locate_archive(std::vector<located_archive>& pathList, const char* c
 			char* p = find_last_slash(CoreRomPaths[i]);
 			if ((NULL != p) && ('\0' == p[1])) p[0] = '\0';
 
+			// custom_dir/romName
+			memset(path, 0, sizeof(path));
+			_stprintf(path, "%s%c%s", CoreRomPaths[i], PATH_DEFAULT_SLASH_C(), romName);
 			if (ZipOpen(path) == 0)
 			{
 				g_find_list_path.push_back(located_archive());
@@ -1054,10 +1051,7 @@ static void locate_archive(std::vector<located_archive>& pathList, const char* c
 			for (INT32 nType = 0; nType < TYPES_MAX; nType++)
 			{
 				memset(path, 0, sizeof(path));
-				snprintf_nowarn(
-					path, sizeof(path), "%s%c%s%c%s",
-					CoreRomPaths[i], PATH_DEFAULT_SLASH_C(), szTypeEnum[0][nType], PATH_DEFAULT_SLASH_C(), romName
-				);
+				_stprintf(path, "%s%c%s%c%s", CoreRomPaths[i], PATH_DEFAULT_SLASH_C(), szTypeEnum[0][nType], PATH_DEFAULT_SLASH_C(), romName);
 				if (ZipOpen(path) == 0)
 				{
 					g_find_list_path.push_back(located_archive());
@@ -2243,11 +2237,10 @@ end:
 static int retro_dat_romset_path(const struct retro_game_info* info, char* pszRomsetPath)
 {
 	INT32 nRet = 0;	// 1: romdata; 2: ips;
+	char szDatDir[MAX_PATH] = { 0 }, szRomset[128] = { 0 }, * pszTmp = NULL;
 
 	if (0 == strcmp(strrchr(info->path, '.'), ".dat"))
 	{
-		char szDatDir[MAX_PATH] = { 0 }, szRomset[100] = { 0 }, * pszTmp = NULL;
-
 		memset(szRomdataName, 0, MAX_PATH);
 		strcpy(szRomdataName, info->path);				// romdata_dir/romdata.dat
 
@@ -2280,7 +2273,37 @@ static int retro_dat_romset_path(const struct retro_game_info* info, char* pszRo
 		_stprintf(pszRomsetPath, _T("%s%c%s"), szDatDir, PATH_DEFAULT_SLASH_C(), szRomset);
 	}
 	else
+	{
 		strcpy(pszRomsetPath, info->path);
+		extract_basename(szRomset, info->path, sizeof(szRomset), "");
+
+		// Not found in the list of games
+		// Probably the set of romdata
+		if (~0U == BurnDrvGetIndexByName(szRomset))
+		{
+			const char* dir = NULL;
+			char szSysDir[MAX_PATH] = { 0 };
+
+			extract_directory(szDatDir, info->path, sizeof(szDatDir));
+			memset(szRomdataName, 0, MAX_PATH);
+			_stprintf(szRomdataName, _T("%s%c%s.dat"), szDatDir, PATH_DEFAULT_SLASH_C(), szRomset);
+
+			if (NULL != (pszTmp = RomdataGetDrvName()))
+				nRet = 1;
+			else
+			{
+				if (environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &dir) && dir)
+				{
+					memcpy(szSysDir, dir, sizeof(szSysDir));
+					memset(szRomdataName, 0, MAX_PATH);
+					_stprintf(szRomdataName, _T("%s%cfbneo%cromdata%c%s.dat"), szSysDir, PATH_DEFAULT_SLASH_C(), PATH_DEFAULT_SLASH_C(), PATH_DEFAULT_SLASH_C(), szRomset);
+
+					if (NULL != (pszTmp = RomdataGetDrvName()))
+						nRet = 1;
+				}
+			}
+		}
+	}
 
 	return nRet;
 }
