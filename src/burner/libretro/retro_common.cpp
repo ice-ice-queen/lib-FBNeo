@@ -42,6 +42,7 @@ struct GameInp *pgi_reset;
 struct GameInp *pgi_diag;
 struct GameInp *pgi_debug_dip_1;
 struct GameInp *pgi_debug_dip_2;
+bool bIsPgmCartGame                   = false; // PGM++
 bool bIsNeogeoCartGame                = false;
 bool allow_neogeo_mode                = true;
 bool neogeo_use_specific_default_bios = false;
