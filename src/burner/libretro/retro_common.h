@@ -236,6 +236,7 @@ extern struct GameInp *pgi_diag;
 extern struct GameInp *pgi_debug_dip_1;
 extern struct GameInp *pgi_debug_dip_2;
 extern bool bIsNeogeoCartGame;
+extern bool bIsPgmCartGame; 	// PGM++
 extern bool allow_neogeo_mode;
 extern bool core_aspect_par;
 extern bool bAllowDepth32;
