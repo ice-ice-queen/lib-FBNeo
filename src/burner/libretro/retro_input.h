@@ -61,5 +61,6 @@ void InputInit();
 void InputExit();
 void SetDefaultDeviceTypes();
 void SetControllerInfo();
+void SetReSetControllers();
 
 #endif

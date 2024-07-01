@@ -1,4 +1,5 @@
 #include "retro_common.h"
+#include "macrokeys.h"
 
 #define MAX_LANGUAGES	3
 
@@ -473,6 +474,8 @@ void set_multi_language_strings()
 
 	for (UINT32 i = 0; i < NUM_STRING; i++)
 		pSelLangStr[i] = multi_language_strings[nLangcode][i];
+
+	set_macro_language_strings(nLangcode);
 }
 
 #undef NUM_STRING

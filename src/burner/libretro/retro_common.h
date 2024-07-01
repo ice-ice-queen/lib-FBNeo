@@ -236,6 +236,8 @@ extern struct GameInp *pgi_diag;
 extern struct GameInp *pgi_debug_dip_1;
 extern struct GameInp *pgi_debug_dip_2;
 extern bool bIsNeogeoCartGame;
+extern bool bIsPgmCartGame;
+extern bool bIsCps1CartGame;
 extern bool allow_neogeo_mode;
 extern bool core_aspect_par;
 extern bool bAllowDepth32;
@@ -256,6 +258,8 @@ extern char g_rom_dir[MAX_PATH];
 extern TCHAR szAppPathDefPath[MAX_PATH];
 extern TCHAR szAppIpsesPath[MAX_PATH];
 extern TCHAR szAppRomdatasPath[MAX_PATH];
+extern struct retro_core_option_v2_definition* option_defs_us;
+extern int idx_var;
 
 char* str_char_replace(char* destination, char c_find, char c_replace);
 void set_neo_system_bios();

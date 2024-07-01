@@ -13,6 +13,7 @@
 #include "retro_input.h"
 #include "retro_memory.h"
 #include "ugui_tools.h"
+#include "macrokeys.h"
 
 #include <file/file_path.h>
 
@@ -1403,7 +1404,9 @@ void retro_reset()
 		// eeproms are loading nCurrentFrame, but we probably don't want this
 		nCurrentFrame = 0;
 	}
-
+	
+	SetReSetControllers();
+	
 	// romdata & ips patches run!
 	if ((-1 != nIndex) || (nPatches > 0))
 	{
@@ -2028,6 +2031,8 @@ static bool retro_load_game_common()
 		}
 
 		bIsNeogeoCartGame = ((BurnDrvGetHardwareCode() & HARDWARE_PUBLIC_MASK) == HARDWARE_SNK_NEOGEO);
+		bIsPgmCartGame = ((BurnDrvGetHardwareCode() & HARDWARE_PUBLIC_MASK) == HARDWARE_IGS_PGM);
+		bIsCps1CartGame = ((BurnDrvGetHardwareCode() & HARDWARE_PUBLIC_MASK) == HARDWARE_CAPCOM_CPS1 || (BurnDrvGetHardwareCode() & HARDWARE_PUBLIC_MASK) == HARDWARE_CAPCOM_CPS1_QSOUND);
 
 		// Define nMaxPlayers early;
 		nMaxPlayers = BurnDrvGetMaxPlayers();
