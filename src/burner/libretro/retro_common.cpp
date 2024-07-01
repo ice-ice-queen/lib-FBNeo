@@ -1,5 +1,6 @@
 #include "retro_common.h"
 #include "retro_input.h"
+#include "macrokeys.h"
 
 struct RomBiosInfo neogeo_bioses[] = {
 	{"sp-s3.sp1",         0x91b64be3, 0x00, "MVS Asia/Europe ver. 6 (1 slot)", NEOGEO_MVS | NEOGEO_EUR, 0 },
@@ -43,6 +44,8 @@ struct GameInp *pgi_diag;
 struct GameInp *pgi_debug_dip_1;
 struct GameInp *pgi_debug_dip_2;
 bool bIsNeogeoCartGame                = false;
+bool bIsPgmCartGame                   = false;
+bool bIsCps1CartGame                  = false;
 bool allow_neogeo_mode                = true;
 bool neogeo_use_specific_default_bios = false;
 bool bAllowDepth32                    = false;
@@ -876,10 +879,11 @@ void evaluate_neogeo_bios_mode(const char* drvname)
 	}
 }
 
+struct retro_core_option_v2_definition *option_defs_us;
 void set_environment()
 {
 	std::vector<const retro_core_option_v2_definition*> vars_systems;
-	struct retro_core_option_v2_definition *option_defs_us;
+	
 #ifdef _MSC_VER
 #if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP)
 	#ifndef FORCE_USE_VFS
@@ -1146,12 +1150,15 @@ void set_environment()
 	int nbr_cheats   = cheat_core_options.size();
 	int nbr_ipses    = ips_core_options.size();
 	int nbr_romdatas = romdata_core_options.size();
+	int nbr_pgm_macros = get_macro_count("pgm");
+	int nbr_neogeo_macros = get_macro_count("neogeo");
+	int nbr_cps1_macros = get_macro_count("cps1");
 
 #if 0
 	log_cb(RETRO_LOG_INFO, "set_environment: SYSTEM: %d, DIPSWITCH: %d\n", nbr_vars, nbr_dips);
 #endif
 
-	option_defs_us = (struct retro_core_option_v2_definition*)calloc(nbr_vars + nbr_dips + nbr_cheats + nbr_ipses + nbr_romdatas + 1, sizeof(struct retro_core_option_v2_definition));
+	option_defs_us = (struct retro_core_option_v2_definition*)calloc(nbr_vars + nbr_dips + nbr_cheats + nbr_ipses + nbr_romdatas + nbr_neogeo_macros + nbr_pgm_macros + nbr_cps1_macros + 1, sizeof(struct retro_core_option_v2_definition));
 
 	int idx_var = 0;
 
@@ -1228,6 +1235,18 @@ void set_environment()
 		idx_var++;
 	}
 
+	if (bIsNeogeoCartGame || (nGameType == RETRO_GAME_TYPE_NEOCD)) {
+		idx_var = AddMacroOptions("neogeo", nbr_neogeo_macros, idx_var);
+	}
+
+	if (bIsPgmCartGame) {
+		idx_var = AddMacroOptions("pgm", nbr_pgm_macros, idx_var);
+	}
+
+	if (bIsCps1CartGame) {
+		idx_var = AddMacroOptions("cps1", nbr_cps1_macros, idx_var);
+	}
+
 	option_defs_us[idx_var] = var_empty;
 
 	static struct retro_core_option_v2_category option_cats_us[] =
@@ -1266,6 +1285,21 @@ void set_environment()
 			"romdata",
 			"RomData",
 			RETRO_ROMDATA_CAT_INFO
+		},
+		{
+			"neogeo_macro",
+			neogeo_macro_desc,
+			macro_info_general
+		},
+		{
+			"pgm_macro",
+			pgm_macro_desc,
+			macro_info_general
+		},
+		{
+			"cps1_macro",
+			cps1_macro_desc,
+			macro_info_general
 		},
 #ifdef FBNEO_DEBUG
 		{

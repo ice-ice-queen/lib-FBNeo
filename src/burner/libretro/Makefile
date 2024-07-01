@@ -61,9 +61,11 @@ VERSION_SCRIPT	:= $(MAIN_FBNEO_DIR)/burner/libretro/link.T
 ifeq ($(subset),)
 	TARGET_NAME := fbneo
 	INCLUDED_MAKEFILE = Makefile.common
+	SOURCES_CXX += $(LIBRETRO_DIR)/macrokeys.cpp
 else
 	TARGET_NAME := fbneo_$(subset)
 	INCLUDED_MAKEFILE = Makefile.$(subset)
+	SOURCES_CXX += $(LIBRETRO_DIR)/macrokeys.cpp
 endif
 
 # Unix
