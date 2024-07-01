@@ -1,7 +1,10 @@
 #include <vector>
+#include <string>
+#include <cstdio>
 #include "retro_common.h"
 #include "retro_input.h"
 #include "burn_gun.h"
+#include "macrokeys.h"
 
 bool bStreetFighterLayout = false;
 INT32 nInputIntfMouseDivider = 1;
@@ -106,6 +109,8 @@ static void AnalyzeGameLayout()
 	INT32 nKickx3[MAX_PLAYERS] = {0, };
 	INT32 nKickInputs[MAX_PLAYERS][3];
 	INT32 nNeogeoButtons[MAX_PLAYERS][4];
+	INT32 nPgmButtons[MAX_PLAYERS][4];
+	INT32 nCps1Buttons[MAX_PLAYERS][2];
 
 	bStreetFighterLayout = false;
 	nMahjongKeyboards = 0;
@@ -113,6 +118,8 @@ static void AnalyzeGameLayout()
 	nFireButtons = 0;
 	nMacroCount = 0;
 	memset(&nNeogeoButtons, 0, sizeof(nNeogeoButtons));
+	memset(&nPgmButtons, 0, sizeof(nPgmButtons));
+	memset(&nCps1Buttons, 0, sizeof(nCps1Buttons));
 	memset(&nPerPlayerAxises, 0, sizeof(nPerPlayerAxises));
 
 	for (UINT32 i = 0; i < nGameInpCount; i++) {
@@ -176,18 +183,13 @@ static void AnalyzeGameLayout()
 			}
 
 			if (bIsNeogeoCartGame || (nGameType == RETRO_GAME_TYPE_NEOCD)) {
-				if (_stricmp(" Button A", bii.szName + 2) == 0) {
-					nNeogeoButtons[nPlayer][0] = i;
-				}
-				if (_stricmp(" Button B", bii.szName + 2) == 0) {
-					nNeogeoButtons[nPlayer][1] = i;
-				}
-				if (_stricmp(" Button C", bii.szName + 2) == 0) {
-					nNeogeoButtons[nPlayer][2] = i;
-				}
-				if (_stricmp(" Button D", bii.szName + 2) == 0) {
-					nNeogeoButtons[nPlayer][3] = i;
-				}
+				AssignButtons("neogeo", bii.szName, bii.szInfo, nPlayer, i, nNeogeoButtons);
+			}
+			if (bIsPgmCartGame) {
+				AssignButtons("pgm", bii.szName, bii.szInfo, nPlayer, i, nPgmButtons);
+			}
+			if (bIsCps1CartGame) {
+				AssignButtons("cps1", bii.szName, bii.szInfo, nPlayer, i, nCps1Buttons);
 			}
 		}
 	}
@@ -224,65 +226,14 @@ static void AnalyzeGameLayout()
 			nMacroCount++;
 			pgi++;
 		}
-		// supposedly, those are the 4 most useful neogeo macros
 		if (bIsNeogeoCartGame || (nGameType == RETRO_GAME_TYPE_NEOCD)) {
-			pgi->nInput = GIT_MACRO_AUTO;
-			pgi->nType = BIT_DIGITAL;
-			pgi->Macro.nMode = 0;
-			sprintf(pgi->Macro.szName, "P%i Buttons AB", nPlayer + 1);
-			BurnDrvGetInputInfo(&bii, nNeogeoButtons[nPlayer][0]);
-			pgi->Macro.pVal[0] = bii.pVal;
-			pgi->Macro.nVal[0] = 1;
-			BurnDrvGetInputInfo(&bii, nNeogeoButtons[nPlayer][1]);
-			pgi->Macro.pVal[1] = bii.pVal;
-			pgi->Macro.nVal[1] = 1;
-			nMacroCount++;
-			pgi++;
-
-			pgi->nInput = GIT_MACRO_AUTO;
-			pgi->nType = BIT_DIGITAL;
-			pgi->Macro.nMode = 0;
-			sprintf(pgi->Macro.szName, "P%i Buttons CD", nPlayer + 1);
-			BurnDrvGetInputInfo(&bii, nNeogeoButtons[nPlayer][2]);
-			pgi->Macro.pVal[0] = bii.pVal;
-			pgi->Macro.nVal[0] = 1;
-			BurnDrvGetInputInfo(&bii, nNeogeoButtons[nPlayer][3]);
-			pgi->Macro.pVal[1] = bii.pVal;
-			pgi->Macro.nVal[1] = 1;
-			nMacroCount++;
-			pgi++;
-
-			pgi->nInput = GIT_MACRO_AUTO;
-			pgi->nType = BIT_DIGITAL;
-			pgi->Macro.nMode = 0;
-			sprintf(pgi->Macro.szName, "P%i Buttons ABC", nPlayer + 1);
-			BurnDrvGetInputInfo(&bii, nNeogeoButtons[nPlayer][0]);
-			pgi->Macro.pVal[0] = bii.pVal;
-			pgi->Macro.nVal[0] = 1;
-			BurnDrvGetInputInfo(&bii, nNeogeoButtons[nPlayer][1]);
-			pgi->Macro.pVal[1] = bii.pVal;
-			pgi->Macro.nVal[1] = 1;
-			BurnDrvGetInputInfo(&bii, nNeogeoButtons[nPlayer][2]);
-			pgi->Macro.pVal[2] = bii.pVal;
-			pgi->Macro.nVal[2] = 1;
-			nMacroCount++;
-			pgi++;
-
-			pgi->nInput = GIT_MACRO_AUTO;
-			pgi->nType = BIT_DIGITAL;
-			pgi->Macro.nMode = 0;
-			sprintf(pgi->Macro.szName, "P%i Buttons BCD", nPlayer + 1);
-			BurnDrvGetInputInfo(&bii, nNeogeoButtons[nPlayer][1]);
-			pgi->Macro.pVal[0] = bii.pVal;
-			pgi->Macro.nVal[0] = 1;
-			BurnDrvGetInputInfo(&bii, nNeogeoButtons[nPlayer][2]);
-			pgi->Macro.pVal[1] = bii.pVal;
-			pgi->Macro.nVal[1] = 1;
-			BurnDrvGetInputInfo(&bii, nNeogeoButtons[nPlayer][3]);
-			pgi->Macro.pVal[2] = bii.pVal;
-			pgi->Macro.nVal[2] = 1;
-			nMacroCount++;
-			pgi++;
+			pgi = AddMacroKeys(pgi, nPlayer, "neogeo", nNeogeoButtons, nMacroCount);
+		}
+		if (bIsPgmCartGame) {
+			pgi = AddMacroKeys(pgi, nPlayer, "pgm", nPgmButtons, nMacroCount);
+		}
+		if (bIsCps1CartGame) {
+			pgi = AddMacroKeys(pgi, nPlayer, "cps1", nCps1Buttons, nMacroCount);
 		}
 	}
 
@@ -301,7 +252,7 @@ INT32 GameInpInit()
 	nMacroCount = 0;
 
 	// We only support up to 4 macros for now
-	nMaxMacro = nMaxPlayers * 4;
+	nMaxMacro = nMaxPlayers * 12;//改为12个，我们最大可能需要预设到11个
 
 	while (BurnDrvGetInputInfo(NULL,nGameInpCount) == 0)
 		nGameInpCount++;
@@ -555,7 +506,7 @@ static INT32 GameInpAnalog2RetroInpAnalog(struct GameInp* pgi, unsigned port, un
 }
 
 // Digital to digital mapping
-static INT32 GameInpDigital2RetroInpKey(struct GameInp* pgi, unsigned port, unsigned id, char *szn, unsigned device = RETRO_DEVICE_JOYPAD, unsigned nInput = GIT_SWITCH)
+extern INT32 GameInpDigital2RetroInpKey(struct GameInp* pgi, unsigned port, unsigned id, char *szn, unsigned device = RETRO_DEVICE_JOYPAD, unsigned nInput = GIT_SWITCH)
 {
 	if(bButtonMapped || pgi->nType != BIT_DIGITAL) return 0;
 	pgi->nInput = nInput;
@@ -1939,15 +1890,20 @@ static INT32 GameInpSpecialOne(struct GameInp* pgi, INT32 nPlayer, char* szb, ch
 		if (strncmp("Buttons 3x Kick", description, 15) == 0)
 			GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_4TH_COL_BOTTOM, description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
 	}
+
 	if (bIsNeogeoCartGame || (nGameType == RETRO_GAME_TYPE_NEOCD)) {
-		if (strncmp("Buttons ABC", description, 11) == 0)
-			GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_4TH_COL_BOTTOM, description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
-		if (strncmp("Buttons BCD", description, 11) == 0)
-			GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_4TH_COL_TOP, description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
-		if (strncmp("Buttons AB", description, 10) == 0)
-			GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_3RD_COL_BOTTOM, description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
-		if (strncmp("Buttons CD", description, 10) == 0)
-			GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_3RD_COL_TOP, description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
+		CustomMacroKeys macrosdata = LoadCustomMacroKeys("neogeo");
+		BindCustomMacroKeys(macrosdata, description, nPlayer, nDeviceType, pgi);
+	}
+
+	if (bIsPgmCartGame) {
+		CustomMacroKeys macrosdata = LoadCustomMacroKeys("pgm");
+		BindCustomMacroKeys(macrosdata, description, nPlayer, nDeviceType, pgi);
+	}
+
+	if (bIsCps1CartGame) {
+		CustomMacroKeys macrosdata = LoadCustomMacroKeys("cps1");
+		BindCustomMacroKeys(macrosdata, description, nPlayer, nDeviceType, pgi);
 	}
 
 	// Handle megadrive
