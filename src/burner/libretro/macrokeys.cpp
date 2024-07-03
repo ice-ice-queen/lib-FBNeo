@@ -5,7 +5,7 @@
 #include <string>
 #include <cstdio>
 #include <cstring>
-
+#include <map>
 
 const char* neogeo_macro_desc;
 const char* pgm_macro_desc;
@@ -38,9 +38,9 @@ void set_macro_language_strings(UINT32 nLangcode) {
 		"肩鍵 R2"
 	};
 	const char* macro_info_shoulder_button_options[] = {
-		"Note: Duplicate binding is ineffective here.\nNeed to check this in <Quick Menu→controls>.",
-		"注：重复绑定在此处无效\n需要于<快捷菜单→控制>中操作",
-		"注：重複綁定在此處無效\n需要於<快捷選单→控制器>中操作"
+		"Note: Keyboard users, please confirm the corresponding keys in <Quick Menu → Control>",
+		"注：键盘使用者请于<快捷菜单→控制>中确认对应键",
+		"註：鍵盤使用者請於<快捷選单→控制器>中確認對應鍵"
 	};
 	const char* macro_disabled_options[] = {
 		"Macro disabled",
@@ -206,11 +206,22 @@ CustomMacroKeys LoadCustomMacroKeys(const char* system) {
 // 绑定宏到RA设备
 INT32 GameInpDigital2RetroInpKey(struct GameInp* pgi, unsigned port, unsigned id, char *szn, unsigned device, unsigned nInput);
 void BindCustomMacroKeys(const CustomMacroKeys& macrosdata, char* description, int nPlayer, unsigned int* nDeviceType, struct GameInp * pgi) {
+	std::map<std::string, int> keyCount; //储存比如<buttons AB>这样的key的出现的当前次数
+
 	for (int i = 0; i < macrosdata.macrocontent.size(); ++i) {
-		const char* key = macrosdata.macrocontent[i].macroKey.c_str();
+		std::string key = macrosdata.macrocontent[i].macroKey;
 		const char* button = macrosdata.macrocontent[i].button.c_str();
 
-		if (strcmp(key, description) == 0) {
+		// 计算key的当前出现次数并添加后缀(比如Buttons AB01)
+		if (keyCount.find(key) == keyCount.end()) {
+			keyCount[key] = 1;
+		} else {
+			keyCount[key]++;
+		}
+		char keyWithSuffix[50];
+		sprintf(keyWithSuffix, "%s%02d", key.c_str(), keyCount[key]);
+		
+		if (strcmp(keyWithSuffix, description) == 0) {
 			if (strcmp("R", button) == 0) {
 				if (nDeviceType[nPlayer] == RETROPAD_MODERN) {
 					GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_3RD_COL_TOP, description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
@@ -227,16 +238,16 @@ void BindCustomMacroKeys(const CustomMacroKeys& macrosdata, char* description, i
 			}
 			if (strcmp("R2", button) == 0) {
 				if (nDeviceType[nPlayer] == RETROPAD_MODERN) {
-					GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_4TH_COL_BOTTOM, description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
+					GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_3RD_COL_BOTTOM, description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
 				} else {
-					GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_JOYPAD_R2, description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
+					GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_4TH_COL_BOTTOM, description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
 				}
 			}
 			if (strcmp("L2", button) == 0) {
 				if (nDeviceType[nPlayer] == RETROPAD_MODERN) {
-					GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_4TH_COL_TOP, description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
+					GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_4TH_COL_BOTTOM, description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
 				} else {
-					GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_JOYPAD_L2, description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
+					GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_4TH_COL_TOP, description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
 				}
 			}
 		}
@@ -291,53 +302,32 @@ void AssignButtons(const char* system, const char* szName, const char* szInfo, i
 struct GameInp* AddMacroKeys(struct GameInp* pgi, int nPlayer, const char* system, int nButtons[][4], UINT32& nMacroCount) {
 	struct BurnInputInfo bii;
 
-	if (strcmp(system, "neogeo") == 0) {
-		// 这里注释下面数组作用：
+		// 数组作用：
 		// 0 对应按钮 A
 		// 1 对应按钮 B
 		// 2 对应按钮 C
 		// 3 对应按钮 D
 		// -1 表示停止设置组合键,直接截断
 
-		// Neogeo宏
-		const char* macros[] = {"AB", "AC", "AD", "BC", "BD", "CD", "ABC", "ABD", "ACD", "BCD", "ABCD"};
-		int button_combinations[][4] = {
-			{0, 1, -1}, {0, 2, -1}, {0, 3, -1}, {1, 2, -1}, {1, 3, -1}, {2, 3, -1},
-			{0, 1, 2, -1}, {0, 1, 3, -1}, {0, 2, 3, -1}, {1, 2, 3, -1}, {0, 1, 2, 3}
-		};
+	const char* macros[] = {"AB", "AC", "AD", "BC", "BD", "CD", "ABC", "ABD", "ACD", "BCD", "ABCD"};
+	int button_combinations[][4] = {
+		{0, 1, -1}, {0, 2, -1}, {0, 3, -1}, {1, 2, -1}, {1, 3, -1}, {2, 3, -1},
+		{0, 1, 2, -1}, {0, 1, 3, -1}, {0, 2, 3, -1}, {1, 2, 3, -1}, {0, 1, 2, 3}
+	};
 
-		for (int i = 0; i < sizeof(macros) / sizeof(macros[0]); i++) {
+	for (int i = 0; i < sizeof(macros) / sizeof(macros[0]); i++) {
+		// 为了确保重复L R L2 R2可以重复绑定，预设4组一模一样的11个组合键
+		// 此处曾做过尝试从预设的RA核心选项环境变量中动态预设组合键
+		// 但是因为读取序列问题，在执行这个分配的时候，环境变量值还不能获取到，
+		// 故而硬编码4组*11个组合键*n个player,大约100多个组合键，
+		// 实属浪费，但是未能找到其他方案，暂时如此
+		for (int k = 1; k <= 4; k++) { // 创建"buttons AB01"-"buttons AB04"
 			pgi->nInput = GIT_MACRO_AUTO;
 			pgi->nType = BIT_DIGITAL;
 			pgi->Macro.nMode = 0;
-			sprintf(pgi->Macro.szName, "P%i Buttons %s", nPlayer + 1, macros[i]);
+			sprintf(pgi->Macro.szName, "P%i Buttons %s%02d", nPlayer + 1, macros[i], k);
 
-			for (int j = 0; j < 4 && button_combinations[i][j] != -1; j++) {
-				BurnDrvGetInputInfo(&bii, nButtons[nPlayer][button_combinations[i][j]]);
-				pgi->Macro.pVal[j] = bii.pVal;
-				pgi->Macro.nVal[j] = 1;
-			}
-
-			nMacroCount++;
-			pgi++;
-		}
-	}
-
-	if (strcmp(system, "pgm") == 0) {
-		// PGM宏
-		const char* macros[] = {"AB", "AC", "AD", "BC", "BD", "CD", "ABC", "ABD", "ACD", "BCD", "ABCD"};
-		int button_combinations[][4] = {
-			{0, 1, -1}, {0, 2, -1}, {0, 3, -1}, {1, 2, -1}, {1, 3, -1}, {2, 3, -1},
-			{0, 1, 2, -1}, {0, 1, 3, -1}, {0, 2, 3, -1}, {1, 2, 3, -1}, {0, 1, 2, 3}
-		};
-
-		for (int i = 0; i < sizeof(macros) / sizeof(macros[0]); i++) {
-			pgi->nInput = GIT_MACRO_AUTO;
-			pgi->nType = BIT_DIGITAL;
-			pgi->Macro.nMode = 0;
-			sprintf(pgi->Macro.szName, "P%i Buttons %s", nPlayer + 1, macros[i]);
-
-			for (int j = 0; j < 4 && button_combinations[i][j] != -1; j++) {
+			for (int j = 0; j < 4 && button_combinations[i][j] != -1; j++) { // 4个按键循环4次或者遇到-1占位符停止
 				BurnDrvGetInputInfo(&bii, nButtons[nPlayer][button_combinations[i][j]]);
 				pgi->Macro.pVal[j] = bii.pVal;
 				pgi->Macro.nVal[j] = 1;
@@ -349,24 +339,24 @@ struct GameInp* AddMacroKeys(struct GameInp* pgi, int nPlayer, const char* syste
 	}
 	return pgi;
 }
+
 // 重载函数-2键
 struct GameInp* AddMacroKeys(struct GameInp* pgi, int nPlayer, const char* system, int nButtons[][2], UINT32& nMacroCount) {
 	struct BurnInputInfo bii;
 
-	if (strcmp(system, "cps1") == 0) {
-		// CPS1宏
-		const char* macros[] = {"AB"};
-		int button_combinations[][4] = {
-			{0, 1, -1}
-		};
+	const char* macros[] = {"AB"};
+	int button_combinations[][2] = {
+		{0, 1}
+	};
 
-		for (int i = 0; i < sizeof(macros) / sizeof(macros[0]); i++) {
+	for (int i = 0; i < sizeof(macros) / sizeof(macros[0]); i++) {
+		for (int k = 1; k <= 4; k++) { // 创建"buttons AB01"-"buttons AB04"
 			pgi->nInput = GIT_MACRO_AUTO;
 			pgi->nType = BIT_DIGITAL;
 			pgi->Macro.nMode = 0;
-			sprintf(pgi->Macro.szName, "P%i Buttons %s", nPlayer + 1, macros[i]);
+			sprintf(pgi->Macro.szName, "P%i Buttons %s%02d", nPlayer + 1, macros[i], k);
 
-			for (int j = 0; j < 4 && button_combinations[i][j] != -1; j++) {
+			for (int j = 0; j < 2 && button_combinations[i][j] != -1; j++) { // 2个按键循环2次或者遇到-1占位符停止
 				BurnDrvGetInputInfo(&bii, nButtons[nPlayer][button_combinations[i][j]]);
 				pgi->Macro.pVal[j] = bii.pVal;
 				pgi->Macro.nVal[j] = 1;
