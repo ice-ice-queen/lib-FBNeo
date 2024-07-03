@@ -11,6 +11,10 @@ const char* neogeo_macro_desc;
 const char* pgm_macro_desc;
 const char* cps1_macro_desc;
 const char* macro_info_general;
+char* R_button_description;
+char* L_button_description;
+char* R2_button_description;
+char* L2_button_description;
 
 macro_category var_fbneo_macro_categories[3];
 
@@ -223,31 +227,41 @@ void BindCustomMacroKeys(const CustomMacroKeys& macrosdata, char* description, i
 		
 		if (strcmp(keyWithSuffix, description) == 0) {
 			if (strcmp("R", button) == 0) {
+				// 此全局变量的创立实为无奈之举，RA手柄会一直刷新，description必须常驻，否则字符串丢失
+				// 前端显示"Buttons AB01-04"有些膈应
+				R_button_description = new char[macrosdata.macrocontent[i].macroKey.size() + 1];
+				strcpy(R_button_description, macrosdata.macrocontent[i].macroKey.c_str());
 				if (nDeviceType[nPlayer] == RETROPAD_MODERN) {
-					GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_3RD_COL_TOP, description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
+					GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_3RD_COL_TOP, R_button_description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
 				} else {
-					GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_3RD_COL_BOTTOM, description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
+					GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_3RD_COL_BOTTOM, R_button_description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
 				}
 			}
 			if (strcmp("L", button) == 0) {
+				L_button_description = new char[macrosdata.macrocontent[i].macroKey.size() + 1];
+				strcpy(L_button_description, macrosdata.macrocontent[i].macroKey.c_str());
 				if (nDeviceType[nPlayer] == RETROPAD_MODERN) {
-					GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_4TH_COL_TOP, description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
+					GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_4TH_COL_TOP, L_button_description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
 				} else {
-					GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_3RD_COL_TOP, description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
+					GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_3RD_COL_TOP, L_button_description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
 				}
 			}
 			if (strcmp("R2", button) == 0) {
+				R2_button_description = new char[macrosdata.macrocontent[i].macroKey.size() + 1];
+				strcpy(R2_button_description, macrosdata.macrocontent[i].macroKey.c_str());
 				if (nDeviceType[nPlayer] == RETROPAD_MODERN) {
-					GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_3RD_COL_BOTTOM, description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
+					GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_3RD_COL_BOTTOM, R2_button_description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
 				} else {
-					GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_4TH_COL_BOTTOM, description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
+					GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_4TH_COL_BOTTOM, R2_button_description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
 				}
 			}
 			if (strcmp("L2", button) == 0) {
+				L2_button_description = new char[macrosdata.macrocontent[i].macroKey.size() + 1];
+				strcpy(L2_button_description, macrosdata.macrocontent[i].macroKey.c_str());
 				if (nDeviceType[nPlayer] == RETROPAD_MODERN) {
-					GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_4TH_COL_BOTTOM, description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
+					GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_4TH_COL_BOTTOM, L2_button_description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
 				} else {
-					GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_4TH_COL_TOP, description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
+					GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_4TH_COL_TOP, L2_button_description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
 				}
 			}
 		}
