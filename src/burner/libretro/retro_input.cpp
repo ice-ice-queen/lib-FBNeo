@@ -3247,6 +3247,6 @@ void retro_set_controller_port_device(unsigned port, unsigned device)
 
 void SetReSetControllers() {
 	bControllersNeedRefresh = true;
-	bControllersSetOnce = true;
+	bControllersSetOnce = false;
 }
 
