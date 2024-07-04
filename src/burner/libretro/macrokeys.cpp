@@ -10,13 +10,14 @@
 const char* neogeo_macro_desc;
 const char* pgm_macro_desc;
 const char* cps1_macro_desc;
+const char* streetfighter_macro_desc;
 const char* macro_info_general;
 char* R_button_description;
 char* L_button_description;
 char* R2_button_description;
 char* L2_button_description;
 
-macro_category var_fbneo_macro_categories[3];
+macro_category var_fbneo_macro_categories[4];
 
 // 更新多语言字符串的函数
 void set_macro_language_strings(UINT32 nLangcode) {
@@ -66,6 +67,11 @@ void set_macro_language_strings(UINT32 nLangcode) {
 		"CPS1 组合键",
 		"CPS1 組合鍵"
 	};
+	const char* streetfighter_macro_desc_options[] = {
+		"StreetFighter Macros",
+		"街霸 组合键",
+		"街霸 組合鍵"
+	};
 	const char* macro_info_general_options[] = {
 		"Set and reload or reset game to take effect.",
 		"设定完毕后重新载入或重启游戏使其生效",
@@ -81,10 +87,11 @@ void set_macro_language_strings(UINT32 nLangcode) {
 	neogeo_macro_desc = neogeo_macro_desc_options[nLangcode];
 	pgm_macro_desc = pgm_macro_desc_options[nLangcode];
 	cps1_macro_desc = cps1_macro_desc_options[nLangcode];
+	streetfighter_macro_desc = streetfighter_macro_desc_options[nLangcode];
 	macro_info_general = macro_info_general_options[nLangcode];
 
 	// 初始化宏选项,目前包含3个系统
-	macro_category temp_var_fbneo_macro_categories[3] = {
+	macro_category temp_var_fbneo_macro_categories[4] = {
 		{
 			"pgm", "pgm_macro",
 			{
@@ -122,6 +129,23 @@ void set_macro_language_strings(UINT32 nLangcode) {
 					{ { "Buttons AB", NULL }, { macro_disabled, NULL }, { NULL, NULL } } },
 				{ "fbneo-cps1-macro-r2", "R2", macro_desc_shoulder_button_r2, macro_info_shoulder_button, "Buttons AB",
 					{ { "Buttons AB", NULL }, { macro_disabled, NULL }, { NULL, NULL } } }
+			}
+		},
+		{
+			"streetfighter", "streetfighter_macro",
+			{
+				{ "fbneo-streetfighter-macro-l2", "L2", macro_desc_shoulder_button_l2, macro_info_shoulder_button, "Buttons ABC",
+					{ { "Buttons AB", NULL }, { "Buttons AC", NULL }, { "Buttons AD", NULL }, { "Buttons AE", NULL }, { "Buttons AF", NULL }, { "Buttons BC", NULL }, { "Buttons BD", NULL }, { "Buttons BE", NULL }, { "Buttons BF", NULL }, { "Buttons CD", NULL }, { "Buttons CE", NULL }, { "Buttons CF", NULL }, { "Buttons DE", NULL }, { "Buttons DF", NULL }, { "Buttons EF", NULL },
+					{ "Buttons ABC", NULL }, { "Buttons ABD", NULL }, { "Buttons ABE", NULL }, { "Buttons ABF", NULL }, { "Buttons ACD", NULL }, { "Buttons ACE", NULL }, { "Buttons ACF", NULL }, { "Buttons ADE", NULL }, { "Buttons ADF", NULL }, { "Buttons AEF", NULL }, { "Buttons BCD", NULL }, { "Buttons BCE", NULL }, { "Buttons BCF", NULL }, { "Buttons BDE", NULL }, { "Buttons BDF", NULL }, { "Buttons BEF", NULL }, { "Buttons CDE", NULL }, { "Buttons CDF", NULL }, { "Buttons CEF", NULL }, { "Buttons DEF", NULL },
+					{ "Buttons ABCD", NULL }, { "Buttons ABCE", NULL }, { "Buttons ABCF", NULL }, { "Buttons ABDE", NULL }, { "Buttons ABDF", NULL }, { "Buttons ABEF", NULL }, { "Buttons ACDE", NULL }, { "Buttons ACDF", NULL }, { "Buttons ACEF", NULL }, { "Buttons ADEF", NULL }, { "Buttons BCDE", NULL }, { "Buttons BCDF", NULL }, { "Buttons BCEF", NULL }, { "Buttons BDEF", NULL }, { "Buttons CDEF", NULL },
+					{ "Buttons ABCDE", NULL }, { "Buttons ABCDF", NULL }, { "Buttons ABCEF", NULL }, { "Buttons ABDEF", NULL }, { "Buttons ACDEF", NULL }, { "Buttons BCDEF", NULL }, { "Buttons ABCDEF", NULL }, { macro_disabled, NULL }, { NULL, NULL } }
+				},
+				{ "fbneo-streetfighter-macro-r2", "R2", macro_desc_shoulder_button_r2, macro_info_shoulder_button, "Buttons DEF",
+					{ { "Buttons AB", NULL }, { "Buttons AC", NULL }, { "Buttons AD", NULL }, { "Buttons AE", NULL }, { "Buttons AF", NULL }, { "Buttons BC", NULL }, { "Buttons BD", NULL }, { "Buttons BE", NULL }, { "Buttons BF", NULL }, { "Buttons CD", NULL }, { "Buttons CE", NULL }, { "Buttons CF", NULL }, { "Buttons DE", NULL }, { "Buttons DF", NULL }, { "Buttons EF", NULL },
+					{ "Buttons ABC", NULL }, { "Buttons ABD", NULL }, { "Buttons ABE", NULL }, { "Buttons ABF", NULL }, { "Buttons ACD", NULL }, { "Buttons ACE", NULL }, { "Buttons ACF", NULL }, { "Buttons ADE", NULL }, { "Buttons ADF", NULL }, { "Buttons AEF", NULL }, { "Buttons BCD", NULL }, { "Buttons BCE", NULL }, { "Buttons BCF", NULL }, { "Buttons BDE", NULL }, { "Buttons BDF", NULL }, { "Buttons BEF", NULL }, { "Buttons CDE", NULL }, { "Buttons CDF", NULL }, { "Buttons CEF", NULL }, { "Buttons DEF", NULL },
+					{ "Buttons ABCD", NULL }, { "Buttons ABCE", NULL }, { "Buttons ABCF", NULL }, { "Buttons ABDE", NULL }, { "Buttons ABDF", NULL }, { "Buttons ABEF", NULL }, { "Buttons ACDE", NULL }, { "Buttons ACDF", NULL }, { "Buttons ACEF", NULL }, { "Buttons ADEF", NULL }, { "Buttons BCDE", NULL }, { "Buttons BCDF", NULL }, { "Buttons BCEF", NULL }, { "Buttons BDEF", NULL }, { "Buttons CDEF", NULL },
+					{ "Buttons ABCDE", NULL }, { "Buttons ABCDF", NULL }, { "Buttons ABCEF", NULL }, { "Buttons ABDEF", NULL }, { "Buttons ACDEF", NULL }, { "Buttons BCDEF", NULL }, { "Buttons ABCDEF", NULL }, { macro_disabled, NULL }, { NULL, NULL } }
+				}
 			}
 		}
 	};
@@ -313,7 +337,7 @@ void AssignButtons(const char* system, const char* szName, const char* szInfo, i
 
 // 批量设定全部组合键
 // 重载函数-4键
-struct GameInp* AddMacroKeys(struct GameInp* pgi, int nPlayer, const char* system, int nButtons[][4], UINT32& nMacroCount) {
+struct GameInp* AddMacroKeys(struct GameInp* pgi, int nPlayer, int nButtons[][4], UINT32& nMacroCount) {
 	struct BurnInputInfo bii;
 
 		// 数组作用：
@@ -355,7 +379,7 @@ struct GameInp* AddMacroKeys(struct GameInp* pgi, int nPlayer, const char* syste
 }
 
 // 重载函数-2键
-struct GameInp* AddMacroKeys(struct GameInp* pgi, int nPlayer, const char* system, int nButtons[][2], UINT32& nMacroCount) {
+struct GameInp* AddMacroKeys(struct GameInp* pgi, int nPlayer, int nButtons[][2], UINT32& nMacroCount) {
 	struct BurnInputInfo bii;
 
 	const char* macros[] = {"AB"};
@@ -372,6 +396,49 @@ struct GameInp* AddMacroKeys(struct GameInp* pgi, int nPlayer, const char* syste
 
 			for (int j = 0; j < 2 && button_combinations[i][j] != -1; j++) { // 2个按键循环2次或者遇到-1占位符停止
 				BurnDrvGetInputInfo(&bii, nButtons[nPlayer][button_combinations[i][j]]);
+				pgi->Macro.pVal[j] = bii.pVal;
+				pgi->Macro.nVal[j] = 1;
+			}
+
+			nMacroCount++;
+			pgi++;
+		}
+	}
+	return pgi;
+}
+
+// 重载函数-6键-StreetFighter(注意此处传递2个button进来，因为源代码创建了拳和踢2个分类，和2键4键不同)
+struct GameInp* AddMacroKeys(struct GameInp* pgi, int nPlayer, int nPunchInputs[][3], int nKickInputs[][3], UINT32& nMacroCount) {
+	struct BurnInputInfo bii;
+
+	const char* macros[] = {
+		"AB", "AC", "AD", "AE", "AF", "BC", "BD", "BE", "BF", "CD", "CE", "CF", "DE", "DF", "EF",
+		"ABC", "ABD", "ABE", "ABF", "ACD", "ACE", "ACF", "ADE", "ADF", "AEF", "BCD", "BCE", "BCF", "BDE", "BDF", "BEF", "CDE", "CDF", "CEF", "DEF",
+		"ABCD", "ABCE", "ABCF", "ABDE", "ABDF", "ABEF", "ACDE", "ACDF", "ACEF", "ADEF", "BCDE", "BCDF", "BCEF", "BDEF", "CDEF",
+		"ABCDE", "ABCDF", "ABCEF", "ABDEF", "ACDEF", "BCDEF", "ABCDEF"
+	};
+
+	int button_combinations[][6] = {
+		{0, 1, -1}, {0, 2, -1}, {0, 3, -1}, {0, 4, -1}, {0, 5, -1}, {1, 2, -1}, {1, 3, -1}, {1, 4, -1}, {1, 5, -1}, {2, 3, -1}, {2, 4, -1}, {2, 5, -1}, {3, 4, -1}, {3, 5, -1}, {4, 5, -1},
+		{0, 1, 2, -1}, {0, 1, 3, -1}, {0, 1, 4, -1}, {0, 1, 5, -1}, {0, 2, 3, -1}, {0, 2, 4, -1}, {0, 2, 5, -1}, {0, 3, 4, -1}, {0, 3, 5, -1}, {0, 4, 5, -1}, {1, 2, 3, -1}, {1, 2, 4, -1}, {1, 2, 5, -1}, {1, 3, 4, -1}, {1, 3, 5, -1}, {1, 4, 5, -1}, {2, 3, 4, -1}, {2, 3, 5, -1}, {2, 4, 5, -1}, {3, 4, 5, -1},
+		{0, 1, 2, 3, -1}, {0, 1, 2, 4, -1}, {0, 1, 2, 5, -1}, {0, 1, 3, 4, -1}, {0, 1, 3, 5, -1}, {0, 1, 4, 5, -1}, {0, 2, 3, 4, -1}, {0, 2, 3, 5, -1}, {0, 2, 4, 5, -1}, {0, 3, 4, 5, -1}, {1, 2, 3, 4, -1}, {1, 2, 3, 5, -1}, {1, 2, 4, 5, -1}, {1, 3, 4, 5, -1}, {2, 3, 4, 5, -1},
+		{0, 1, 2, 3, 4, -1}, {0, 1, 2, 3, 5, -1}, {0, 1, 2, 4, 5, -1}, {0, 1, 3, 4, 5, -1}, {0, 2, 3, 4, 5, -1}, {1, 2, 3, 4, 5, -1},
+		{0, 1, 2, 3, 4, 5}
+	};
+
+	for (int i = 0; i < sizeof(macros) / sizeof(macros[0]); i++) {
+		for (int k = 1; k <= 2; k++) { // 创建"buttons AB01"-"buttons AB02"，因为只有L2和R2
+			pgi->nInput = GIT_MACRO_AUTO;
+			pgi->nType = BIT_DIGITAL;
+			pgi->Macro.nMode = 0;
+			sprintf(pgi->Macro.szName, "P%i Buttons %s%02d", nPlayer + 1, macros[i], k);
+
+			for (int j = 0; j < 6 && button_combinations[i][j] != -1; j++) { // 6个按键循环6次或者遇到-1占位符停止
+				if (button_combinations[i][j] < 3) { // ABC时候从拳取键值
+					BurnDrvGetInputInfo(&bii, nPunchInputs[nPlayer][button_combinations[i][j]]);
+				} else {							// DEF时候从踢取键值
+					BurnDrvGetInputInfo(&bii, nKickInputs[nPlayer][button_combinations[i][j] - 3]);
+				}
 				pgi->Macro.pVal[j] = bii.pVal;
 				pgi->Macro.nVal[j] = 1;
 			}

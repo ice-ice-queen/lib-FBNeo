@@ -9,6 +9,7 @@
 extern const char* neogeo_macro_desc;
 extern const char* pgm_macro_desc;
 extern const char* cps1_macro_desc;
+extern const char* streetfighter_macro_desc;
 extern const char* macro_info_general;
 
 // 定义 macro_option_value 结构体
@@ -24,7 +25,7 @@ struct macro_option {
 	const char* option_name;
 	const char* info;
 	const char* default_value;
-	macro_option_value values[13]; // 每个宏选项下有12个子选项，还需要多加一个null项
+	macro_option_value values[60]; // 最大可能出現57個按鍵組合，"加上取消"和"NULL"
 };
 
 // 定义 macro_category 结构体
@@ -58,9 +59,10 @@ void BindCustomMacroKeys(const CustomMacroKeys& macrosdata, char* description, i
 extern CustomMacroKeys macrodata;
 extern macro_category var_fbneo_macro_categories[];
 
-// 重载函数用于2键和4键基板
-struct GameInp* AddMacroKeys(struct GameInp* pgi, int nPlayer, const char* system, int nButtons[][4], UINT32& nMacroCount);
-struct GameInp* AddMacroKeys(struct GameInp* pgi, int nPlayer, const char* system, int nButtons[][2], UINT32& nMacroCount);
+// 重载函数用于2键、4键基板、6键街霸
+struct GameInp* AddMacroKeys(struct GameInp* pgi, int nPlayer, int nButtons[][4], UINT32& nMacroCount);
+struct GameInp* AddMacroKeys(struct GameInp* pgi, int nPlayer, int nButtons[][2], UINT32& nMacroCount);
+struct GameInp* AddMacroKeys(struct GameInp* pgi, int nPlayer, int nPunchInputs[][3], int nKickInputs[][3], UINT32& nMacroCount);
 
 void AssignButtons(const char* system, const char* szName, const char* szInfo, int nPlayer, int i, int nButtons[][4]);
 void AssignButtons(const char* system, const char* szName, const char* szInfo, int nPlayer, int i, int nButtons[][2]);

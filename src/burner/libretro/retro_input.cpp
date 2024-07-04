@@ -198,42 +198,17 @@ static void AnalyzeGameLayout()
 
 	// We only support macros deemed "most useful" for now
 	for (UINT32 nPlayer = 0; nPlayer < nMaxPlayers; nPlayer++) {
-		if (nPunchx3[nPlayer] == 7) {		// Create a 3x punch macro
-			pgi->nInput = GIT_MACRO_AUTO;
-			pgi->nType = BIT_DIGITAL;
-
-			sprintf(pgi->Macro.szName, "P%i Buttons 3x Punch", nPlayer + 1);
-			for (INT32 j = 0; j < 3; j++) {
-				BurnDrvGetInputInfo(&bii, nPunchInputs[nPlayer][j]);
-				pgi->Macro.pVal[j] = bii.pVal;
-				pgi->Macro.nVal[j] = 1;
-			}
-
-			nMacroCount++;
-			pgi++;
-		}
-		if (nKickx3[nPlayer] == 7) {		// Create a 3x kick macro
-			pgi->nInput = GIT_MACRO_AUTO;
-			pgi->nType = BIT_DIGITAL;
-
-			sprintf(pgi->Macro.szName, "P%i Buttons 3x Kick", nPlayer + 1);
-			for (INT32 j = 0; j < 3; j++) {
-				BurnDrvGetInputInfo(&bii, nKickInputs[nPlayer][j]);
-				pgi->Macro.pVal[j] = bii.pVal;
-				pgi->Macro.nVal[j] = 1;
-			}
-
-			nMacroCount++;
-			pgi++;
+		if ((nPunchx3[nPlayer] == 7) && (nKickx3[nPlayer] == 7)) {
+			pgi = AddMacroKeys(pgi, nPlayer, nPunchInputs, nKickInputs, nMacroCount);
 		}
 		if (bIsNeogeoCartGame || (nGameType == RETRO_GAME_TYPE_NEOCD)) {
-			pgi = AddMacroKeys(pgi, nPlayer, "neogeo", nNeogeoButtons, nMacroCount);
+			pgi = AddMacroKeys(pgi, nPlayer, nNeogeoButtons, nMacroCount);
 		}
 		if (bIsPgmCartGame) {
-			pgi = AddMacroKeys(pgi, nPlayer, "pgm", nPgmButtons, nMacroCount);
+			pgi = AddMacroKeys(pgi, nPlayer, nPgmButtons, nMacroCount);
 		}
 		if (bIsCps1CartGame) {
-			pgi = AddMacroKeys(pgi, nPlayer, "cps1", nCps1Buttons, nMacroCount);
+			pgi = AddMacroKeys(pgi, nPlayer, nCps1Buttons, nMacroCount);
 		}
 	}
 
@@ -252,7 +227,7 @@ INT32 GameInpInit()
 	nMacroCount = 0;
 
 	// We only support up to 4 macros for now
-	nMaxMacro = nMaxPlayers * 48;//改为48个，我们最大可能需要预设到11个*4组重复绑定(L R L2 R2)
+	nMaxMacro = nMaxPlayers * 120;//改为120个，我们最大可能需要预设到11个*4组重复绑定(L R L2 R2)或57个*2组(街霸6键绑定L2和R2)
 
 	while (BurnDrvGetInputInfo(NULL,nGameInpCount) == 0)
 		nGameInpCount++;
@@ -1885,10 +1860,8 @@ static INT32 GameInpSpecialOne(struct GameInp* pgi, INT32 nPlayer, char* szb, ch
 	}
 
 	if (bStreetFighterLayout) {
-		if (strncmp("Buttons 3x Punch", description, 16) == 0)
-			GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_4TH_COL_TOP, description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
-		if (strncmp("Buttons 3x Kick", description, 15) == 0)
-			GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_4TH_COL_BOTTOM, description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
+		CustomMacroKeys macrosdata = LoadCustomMacroKeys("streetfighter");
+		BindCustomMacroKeys(macrosdata, description, nPlayer, nDeviceType, pgi);
 	}
 
 	if (bIsNeogeoCartGame || (nGameType == RETRO_GAME_TYPE_NEOCD)) {

@@ -62,5 +62,5 @@ void InputExit();
 void SetDefaultDeviceTypes();
 void SetControllerInfo();
 void SetReSetControllers();
-
+extern bool bStreetFighterLayout;
 #endif

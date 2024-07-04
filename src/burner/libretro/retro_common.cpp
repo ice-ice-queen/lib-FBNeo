@@ -1153,12 +1153,13 @@ void set_environment()
 	int nbr_pgm_macros = get_macro_count("pgm");
 	int nbr_neogeo_macros = get_macro_count("neogeo");
 	int nbr_cps1_macros = get_macro_count("cps1");
+	int nbr_streetfighter_macros = get_macro_count("streetfighter");
 
 #if 0
 	log_cb(RETRO_LOG_INFO, "set_environment: SYSTEM: %d, DIPSWITCH: %d\n", nbr_vars, nbr_dips);
 #endif
 
-	option_defs_us = (struct retro_core_option_v2_definition*)calloc(nbr_vars + nbr_dips + nbr_cheats + nbr_ipses + nbr_romdatas + nbr_neogeo_macros + nbr_pgm_macros + nbr_cps1_macros + 1, sizeof(struct retro_core_option_v2_definition));
+	option_defs_us = (struct retro_core_option_v2_definition*)calloc(nbr_vars + nbr_dips + nbr_cheats + nbr_ipses + nbr_romdatas + nbr_neogeo_macros + nbr_pgm_macros + nbr_cps1_macros + nbr_streetfighter_macros + 1, sizeof(struct retro_core_option_v2_definition));
 
 	int idx_var = 0;
 
@@ -1247,6 +1248,10 @@ void set_environment()
 		idx_var = AddMacroOptions("cps1", nbr_cps1_macros, idx_var);
 	}
 
+	if (bStreetFighterLayout) {
+		idx_var = AddMacroOptions("streetfighter", nbr_streetfighter_macros, idx_var);
+	}
+
 	option_defs_us[idx_var] = var_empty;
 
 	static struct retro_core_option_v2_category option_cats_us[] =
@@ -1299,6 +1304,11 @@ void set_environment()
 		{
 			"cps1_macro",
 			cps1_macro_desc,
+			macro_info_general
+		},
+		{
+			"streetfighter_macro",
+			streetfighter_macro_desc,
 			macro_info_general
 		},
 #ifdef FBNEO_DEBUG
