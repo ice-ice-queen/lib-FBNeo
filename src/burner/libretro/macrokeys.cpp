@@ -59,6 +59,11 @@ void set_macro_language_strings(UINT32 nLangcode) {
 		"注：键盘使用者请于<快捷菜单→控制>中确认对应键",
 		"註：鍵盤使用者請於<快捷選单→控制器>中確認對應鍵"
 	};
+	const char* macro_info_pgm_button_options[] = {
+		"ABCD represents button 1, button 2, button 3, button 4 in sequence\nNote: Keyboard users, please confirm the corresponding keys in <Quick Menu → Control>",
+		"ABCD依次代表button 1, button 2, button 3, button 4\n注：键盘使用者请于<快捷菜单→控制>中确认对应键",
+		"ABCD依次代button 1, button 2, button 3, button 4\n註：鍵盤使用者請於<快捷選单→控制器>中確認對應鍵"
+	};
 	const char* macro_info_streetfighter_button_options[] = {
 		"ABC represents Weak, Medium, and Strong Punches in sequence\nDEF represents Weak, Medium, and Strong Kicks in sequence\nNote: Keyboard users, please confirm the corresponding keys in <Quick Menu → Control>",
 		"ABC依次代表轻/中/重拳\nDEF依次代表轻/中/重踢\n注：键盘使用者请于<快捷菜单→控制>中确认对应键",
@@ -102,6 +107,7 @@ void set_macro_language_strings(UINT32 nLangcode) {
 	const char* macro_desc_button_l3 = macro_desc_button_l3_options[nLangcode];
 	const char* macro_desc_button_r3 = macro_desc_button_r3_options[nLangcode];
 	const char* macro_info_button = macro_info_button_options[nLangcode];
+	const char* macro_info_pgm_button = macro_info_pgm_button_options[nLangcode];
 	const char* macro_info_streetfighter_button = macro_info_streetfighter_button_options[nLangcode];
 	const char* macro_disabled = macro_disabled_options[nLangcode];
 	neogeo_macro_desc = neogeo_macro_desc_options[nLangcode];
@@ -116,13 +122,13 @@ void set_macro_language_strings(UINT32 nLangcode) {
 			// 全部的11种组合中"Buttons ACD"用不上-感谢ppx的jjsnake帮助查询整理
 			"pgm", "pgm_macro",
 			{
-				{ "fbneo-pgm-macro-l", "L", macro_desc_button_l, macro_info_button, "Buttons CD",
+				{ "fbneo-pgm-macro-l", "L", macro_desc_button_l, macro_info_pgm_button, "Buttons CD",
 					{ { "Buttons AB", NULL }, { "Buttons AC", NULL }, { "Buttons AD", NULL }, { "Buttons BC", NULL }, { "Buttons BD", NULL }, { "Buttons CD", NULL }, { "Buttons ABC", NULL }, { "Buttons ABD", NULL }, { "Buttons BCD", NULL }, { "Buttons ABCD", NULL }, { macro_disabled, NULL }, { NULL, NULL } } },
-				{ "fbneo-pgm-macro-r", "R", macro_desc_button_r, macro_info_button, "Buttons AB",
+				{ "fbneo-pgm-macro-r", "R", macro_desc_button_r, macro_info_pgm_button, "Buttons AB",
 					{ { "Buttons AB", NULL }, { "Buttons AC", NULL }, { "Buttons AD", NULL }, { "Buttons BC", NULL }, { "Buttons BD", NULL }, { "Buttons CD", NULL }, { "Buttons ABC", NULL }, { "Buttons ABD", NULL }, { "Buttons BCD", NULL }, { "Buttons ABCD", NULL }, { macro_disabled, NULL }, { NULL, NULL } } },
-				{ "fbneo-pgm-macro-l2", "L2", macro_desc_button_l2, macro_info_button, "Buttons BC",
+				{ "fbneo-pgm-macro-l2", "L2", macro_desc_button_l2, macro_info_pgm_button, "Buttons BC",
 					{ { "Buttons AB", NULL }, { "Buttons AC", NULL }, { "Buttons AD", NULL }, { "Buttons BC", NULL }, { "Buttons BD", NULL }, { "Buttons CD", NULL }, { "Buttons ABC", NULL }, { "Buttons ABD", NULL }, { "Buttons BCD", NULL }, { "Buttons ABCD", NULL }, { macro_disabled, NULL }, { NULL, NULL } } },
-				{ "fbneo-pgm-macro-r2", "R2", macro_desc_button_r2, macro_info_button, "Buttons ABC",
+				{ "fbneo-pgm-macro-r2", "R2", macro_desc_button_r2, macro_info_pgm_button, "Buttons ABC",
 					{ { "Buttons AB", NULL }, { "Buttons AC", NULL }, { "Buttons AD", NULL }, { "Buttons BC", NULL }, { "Buttons BD", NULL }, { "Buttons CD", NULL }, { "Buttons ABC", NULL }, { "Buttons ABD", NULL }, { "Buttons BCD", NULL }, { "Buttons ABCD", NULL }, { macro_disabled, NULL }, { NULL, NULL } } }
 			}
 		},
@@ -277,12 +283,46 @@ CustomMacroKeys LoadCustomMacroKeys(const char* system) {
 	return macrodata;
 }
 
+// PGM和街霸需要更换一下Description以便符合RA控制器里面的界面统一性
+std::string ReWriteDescription(const std::string& input, const std::string& system) {
+	const std::string prefix = "Buttons ";
+	if (input.find(prefix) == 0) {
+		std::string result = input.substr(prefix.size());
+		if (system == "pgm") {
+			std::replace(result.begin(), result.end(), 'A', '1');
+			std::replace(result.begin(), result.end(), 'B', '2');
+			std::replace(result.begin(), result.end(), 'C', '3');
+			std::replace(result.begin(), result.end(), 'D', '4');
+		} else if (system == "streetfighter") {
+			std::string temp;
+			for (size_t i = 0; i < result.size(); ++i) {
+				if (!temp.empty()) {
+					temp += "|"; // Add a pipe as a separator
+				}
+				switch (result[i]) {
+					case 'A': temp += "wP"; break;
+					case 'B': temp += "mP"; break;
+					case 'C': temp += "sP"; break;
+					case 'D': temp += "wK"; break;
+					case 'E': temp += "mK"; break;
+					case 'F': temp += "sK"; break;
+					default: temp += result[i]; break;
+				}
+			}
+			result = temp;
+		}
+		return prefix + result;
+	}
+	return input;
+}
+
 // 绑定宏到RA输入设备
 INT32 GameInpDigital2RetroInpKey(struct GameInp* pgi, unsigned port, unsigned id, char *szn, unsigned device, unsigned nInput);
 void BindCustomMacroKeys(const CustomMacroKeys& macrosdata, char* description, int nPlayer, unsigned int* nDeviceType, struct GameInp * pgi) {
 	std::map<std::string, int> keyCount; //储存比如<buttons AB>这样的key的出现的当前次数
 
 	for (int i = 0; i < macrosdata.macrocontent.size(); ++i) {
+		const std::string system = macrosdata.macrocontent[i].system;
 		std::string key = macrosdata.macrocontent[i].macroKey;
 		const char* button = macrosdata.macrocontent[i].button.c_str();
 
@@ -299,33 +339,39 @@ void BindCustomMacroKeys(const CustomMacroKeys& macrosdata, char* description, i
 			if (strcmp("R", button) == 0) {
 				// 此全局变量的创立实为无奈之举，RA手柄会一直刷新，description必须常驻，否则字符串丢失
 				// 前端显示"Buttons AB01-04"毕竟不正规
-				R_button_description = new char[macrosdata.macrocontent[i].macroKey.size() + 1];
-				strcpy(R_button_description, macrosdata.macrocontent[i].macroKey.c_str());
+				std::string rewrittenDescription = ReWriteDescription(macrosdata.macrocontent[i].macroKey, system);
+				R_button_description = new char[rewrittenDescription.size() + 1];
+				strcpy(R_button_description, rewrittenDescription.c_str());
 				GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_JOYPAD_R, R_button_description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
 			}
 			if (strcmp("L", button) == 0) {
-				L_button_description = new char[macrosdata.macrocontent[i].macroKey.size() + 1];
-				strcpy(L_button_description, macrosdata.macrocontent[i].macroKey.c_str());
+				std::string rewrittenDescription = ReWriteDescription(macrosdata.macrocontent[i].macroKey, system);
+				L_button_description = new char[rewrittenDescription.size() + 1];
+				strcpy(L_button_description, rewrittenDescription.c_str());
 				GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_JOYPAD_L, L_button_description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
 			}
 			if (strcmp("R2", button) == 0) {
-				R2_button_description = new char[macrosdata.macrocontent[i].macroKey.size() + 1];
-				strcpy(R2_button_description, macrosdata.macrocontent[i].macroKey.c_str());
+				std::string rewrittenDescription = ReWriteDescription(macrosdata.macrocontent[i].macroKey, system);
+				R2_button_description = new char[rewrittenDescription.size() + 1];
+				strcpy(R2_button_description, rewrittenDescription.c_str());
 				GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_JOYPAD_R2, R2_button_description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
 			}
 			if (strcmp("L2", button) == 0) {
-				L2_button_description = new char[macrosdata.macrocontent[i].macroKey.size() + 1];
-				strcpy(L2_button_description, macrosdata.macrocontent[i].macroKey.c_str());
+				std::string rewrittenDescription = ReWriteDescription(macrosdata.macrocontent[i].macroKey, system);
+				L2_button_description = new char[rewrittenDescription.size() + 1];
+				strcpy(L2_button_description, rewrittenDescription.c_str());
 				GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_JOYPAD_L2, L2_button_description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
 			}
 			if (strcmp("R3", button) == 0) {
-				R3_button_description = new char[macrosdata.macrocontent[i].macroKey.size() + 1];
-				strcpy(R3_button_description, macrosdata.macrocontent[i].macroKey.c_str());
+				std::string rewrittenDescription = ReWriteDescription(macrosdata.macrocontent[i].macroKey, system);
+				R3_button_description = new char[rewrittenDescription.size() + 1];
+				strcpy(R3_button_description, rewrittenDescription.c_str());
 				GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_JOYPAD_R3, R3_button_description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
 			}
 			if (strcmp("L3", button) == 0) {
-				L3_button_description = new char[macrosdata.macrocontent[i].macroKey.size() + 1];
-				strcpy(L3_button_description, macrosdata.macrocontent[i].macroKey.c_str());
+				std::string rewrittenDescription = ReWriteDescription(macrosdata.macrocontent[i].macroKey, system);
+				L3_button_description = new char[rewrittenDescription.size() + 1];
+				strcpy(L3_button_description, rewrittenDescription.c_str());
 				GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_JOYPAD_L3, L3_button_description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
 			}
 		}
