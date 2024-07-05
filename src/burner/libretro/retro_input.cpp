@@ -227,7 +227,7 @@ INT32 GameInpInit()
 	nMacroCount = 0;
 
 	// We only support up to 4 macros for now
-	nMaxMacro = nMaxPlayers * 120;//改为120个，我们最大可能需要预设到11个*4组重复绑定(L R L2 R2)或57个*2组(街霸6键绑定L2和R2)
+	nMaxMacro = nMaxPlayers * 60;//改为60个，我们最大可能需要预设到11个*4组重复绑定(L R L2 R2)或13个*4组(街霸6键绑定L2和R2)
 
 	while (BurnDrvGetInputInfo(NULL,nGameInpCount) == 0)
 		nGameInpCount++;
