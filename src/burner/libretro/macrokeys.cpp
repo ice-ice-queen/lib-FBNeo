@@ -59,6 +59,11 @@ void set_macro_language_strings(UINT32 nLangcode) {
 		"注：键盘使用者请于<快捷菜单→控制>中确认对应键",
 		"註：鍵盤使用者請於<快捷選单→控制器>中確認對應鍵"
 	};
+	const char* macro_info_streetfighter_button_options[] = {
+		"ABC represents Weak, Medium, and Strong Punches in sequence\nDEF represents Weak, Medium, and Strong Kicks in sequence\nNote: Keyboard users, please confirm the corresponding keys in <Quick Menu → Control>",
+		"ABC依次代表轻/中/重拳\nDEF依次代表轻/中/重踢\n注：键盘使用者请于<快捷菜单→控制>中确认对应键",
+		"ABC依次代表輕/中/重拳\nDEF依次代表輕/中/重踢\n註：鍵盤使用者請於<快捷選单→控制器>中確認對應鍵"
+	};
 	const char* macro_disabled_options[] = {
 		"Disable Combination",
 		"取消组合键",
@@ -97,6 +102,7 @@ void set_macro_language_strings(UINT32 nLangcode) {
 	const char* macro_desc_button_l3 = macro_desc_button_l3_options[nLangcode];
 	const char* macro_desc_button_r3 = macro_desc_button_r3_options[nLangcode];
 	const char* macro_info_button = macro_info_button_options[nLangcode];
+	const char* macro_info_streetfighter_button = macro_info_streetfighter_button_options[nLangcode];
 	const char* macro_disabled = macro_disabled_options[nLangcode];
 	neogeo_macro_desc = neogeo_macro_desc_options[nLangcode];
 	pgm_macro_desc = pgm_macro_desc_options[nLangcode];
@@ -170,19 +176,19 @@ void set_macro_language_strings(UINT32 nLangcode) {
 			// 全部的57种组合中下述13种组合大概率有效-感谢ppx的jjsnake帮助查询整理
 			"streetfighter", "streetfighter_macro",
 			{
-				{ "fbneo-streetfighter-macro-l2", "L2", macro_desc_button_l2, macro_info_button, "Buttons ABC",
+				{ "fbneo-streetfighter-macro-l2", "L2", macro_desc_button_l2, macro_info_streetfighter_button, "Buttons ABC",
 					{ { "Buttons AB", NULL }, { "Buttons AC", NULL }, { "Buttons AD", NULL }, { "Buttons BC", NULL }, { "Buttons BE", NULL }, { "Buttons CD", NULL }, { "Buttons CE", NULL }, { "Buttons CF", NULL }, { "Buttons DE", NULL }, { "Buttons DF", NULL }, { "Buttons EF", NULL },
 					{ "Buttons ABC", NULL }, { "Buttons DEF", NULL }, { macro_disabled, NULL }, { NULL, NULL } }
 				},
-				{ "fbneo-streetfighter-macro-r2", "R2", macro_desc_button_r2, macro_info_button, "Buttons DEF",
+				{ "fbneo-streetfighter-macro-r2", "R2", macro_desc_button_r2, macro_info_streetfighter_button, "Buttons DEF",
 					{ { "Buttons AB", NULL }, { "Buttons AC", NULL }, { "Buttons AD", NULL }, { "Buttons BC", NULL }, { "Buttons BE", NULL }, { "Buttons CD", NULL }, { "Buttons CE", NULL }, { "Buttons CF", NULL }, { "Buttons DE", NULL }, { "Buttons DF", NULL }, { "Buttons EF", NULL },
 					{ "Buttons ABC", NULL }, { "Buttons DEF", NULL }, { macro_disabled, NULL }, { NULL, NULL } }
 				},
-				{ "fbneo-streetfighter-macro-l3", "L3", macro_desc_button_l3, macro_info_button, macro_disabled,
+				{ "fbneo-streetfighter-macro-l3", "L3", macro_desc_button_l3, macro_info_streetfighter_button, macro_disabled,
 					{ { "Buttons AB", NULL }, { "Buttons AC", NULL }, { "Buttons AD", NULL }, { "Buttons BC", NULL }, { "Buttons BE", NULL }, { "Buttons CD", NULL }, { "Buttons CE", NULL }, { "Buttons CF", NULL }, { "Buttons DE", NULL }, { "Buttons DF", NULL }, { "Buttons EF", NULL },
 					{ "Buttons ABC", NULL }, { "Buttons DEF", NULL }, { macro_disabled, NULL }, { NULL, NULL } }
 				},
-				{ "fbneo-streetfighter-macro-r3", "R3", macro_desc_button_r3, macro_info_button, macro_disabled,
+				{ "fbneo-streetfighter-macro-r3", "R3", macro_desc_button_r3, macro_info_streetfighter_button, macro_disabled,
 					{ { "Buttons AB", NULL }, { "Buttons AC", NULL }, { "Buttons AD", NULL }, { "Buttons BC", NULL }, { "Buttons BE", NULL }, { "Buttons CD", NULL }, { "Buttons CE", NULL }, { "Buttons CF", NULL }, { "Buttons DE", NULL }, { "Buttons DF", NULL }, { "Buttons EF", NULL },
 					{ "Buttons ABC", NULL }, { "Buttons DEF", NULL }, { macro_disabled, NULL }, { NULL, NULL } }
 				}
@@ -292,7 +298,7 @@ void BindCustomMacroKeys(const CustomMacroKeys& macrosdata, char* description, i
 		if (strcmp(keyWithSuffix, description) == 0) {
 			if (strcmp("R", button) == 0) {
 				// 此全局变量的创立实为无奈之举，RA手柄会一直刷新，description必须常驻，否则字符串丢失
-				// 前端显示"Buttons AB01-04"有些膈应
+				// 前端显示"Buttons AB01-04"毕竟不正规
 				R_button_description = new char[macrosdata.macrocontent[i].macroKey.size() + 1];
 				strcpy(R_button_description, macrosdata.macrocontent[i].macroKey.c_str());
 				GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_JOYPAD_R, R_button_description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
@@ -401,20 +407,24 @@ struct GameInp* AddMacroKeys(struct GameInp* pgi, int nPlayer, int nButtonsTwo[]
 	for (int i = 0; i < num_combs; i++) {
 		macros[i] = category->options[0].values[i].value;
 		button_combinations[i] = (int*)malloc(7 * sizeof(int)); // 最大6键+1=7是为了存储 -1 终止符
-
+		// 此处说明举例：
+		// 会构建如下数组macros[]={"Buttons AB","Buttons BCD"}
+		// 对应button_combinations[]={(0,1,-1),(1,2,3,-1)}
+		// -1占位符用于下方循环的时候直接截断，只处理01或者123也就是AB或者BCD
 		int j = 0;
-		if (strstr(macros[i], "A") != NULL) button_combinations[i][j++] = 0;
-		if (strstr(macros[i], "B") != NULL) button_combinations[i][j++] = 1;
-		if (strstr(macros[i], "C") != NULL) button_combinations[i][j++] = 2;
-		if (strstr(macros[i], "D") != NULL) button_combinations[i][j++] = 3;
-		if (strstr(macros[i], "E") != NULL) button_combinations[i][j++] = 4;
-		if (strstr(macros[i], "F") != NULL) button_combinations[i][j++] = 5;
+		const char* button_str = macros[i] + 8; // 移除开头的 "Buttons " 进行后面按键名的赋值
+		if (strstr(button_str, "A") != NULL) button_combinations[i][j++] = 0;
+		if (strstr(button_str, "B") != NULL) button_combinations[i][j++] = 1;
+		if (strstr(button_str, "C") != NULL) button_combinations[i][j++] = 2;
+		if (strstr(button_str, "D") != NULL) button_combinations[i][j++] = 3;
+		if (strstr(button_str, "E") != NULL) button_combinations[i][j++] = 4;
+		if (strstr(button_str, "F") != NULL) button_combinations[i][j++] = 5;
 		button_combinations[i][j] = -1; // 终止符
 	}
 
 
 	for (int i = 0; i < num_combs; i++) {
-		// 为了确保重复L R L2 R2等可以重复绑定，预设和按键数量一模一样的N个组合键
+		// 为了确保L R L2 R2等可以重复绑定，预设和按键数量一模一样的N个组合键
 		// 此处曾做过尝试从预设的RA核心选项环境变量中动态预设组合键
 		// 但是因为读取序列问题，在执行这个分配的时候，环境变量值还不能获取到，
 		// 故而硬编码和按键数量一模一样的N个组合键*n个player,大约100多个组合键，
@@ -422,7 +432,10 @@ struct GameInp* AddMacroKeys(struct GameInp* pgi, int nPlayer, int nButtonsTwo[]
 		for (int k = 1; k <= num_prebindkeys; k++) { // 创建"buttons AB01"-"buttons AB0n"，也就是L和R等等的数量
 			pgi->nInput = GIT_MACRO_AUTO;
 			pgi->nType = BIT_DIGITAL;
-			pgi->Macro.nMode = 0;
+			if (nPunchInputs == NULL && nKickInputs == NULL) { // 注意这里的差异，街霸类6键布局此处不需要设置nmode
+				pgi->Macro.nMode = 0;
+			}
+
 			sprintf(pgi->Macro.szName, "P%i %s%02d", nPlayer + 1, macros[i], k);
 
 			for (int j = 0; j < 7 && button_combinations[i][j] != -1; j++) { // 最大6个按键循环7次(含-1终止符)或者遇到-1占位符停止
