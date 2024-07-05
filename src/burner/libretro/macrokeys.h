@@ -25,14 +25,14 @@ struct macro_option {
 	const char* option_name;
 	const char* info;
 	const char* default_value;
-	macro_option_value values[60]; // 最大可能出現57個按鍵組合，"加上取消"和"NULL"
+	macro_option_value values[20]; // 目前最大可能出現15個按鍵組合，加上"取消"和"NULL"
 };
 
 // 定义 macro_category 结构体
 struct macro_category {
 	const char* system;
 	const char* category_name;
-	macro_option options[4]; // 每个类别下有4个宏选项
+	macro_option options[4]; // 每个类别下预设有4个键位对应的宏选项
 };
 
 // 自定义宏键结构体
@@ -59,17 +59,9 @@ void BindCustomMacroKeys(const CustomMacroKeys& macrosdata, char* description, i
 extern CustomMacroKeys macrodata;
 extern macro_category var_fbneo_macro_categories[];
 
-// 重载函数用于2键、4键基板、6键街霸
-struct GameInp* AddMacroKeys(struct GameInp* pgi, int nPlayer, int nButtons[][4], UINT32& nMacroCount);
-struct GameInp* AddMacroKeys(struct GameInp* pgi, int nPlayer, int nButtons[][2], UINT32& nMacroCount);
-struct GameInp* AddMacroKeys(struct GameInp* pgi, int nPlayer, int nPunchInputs[][3], int nKickInputs[][3], UINT32& nMacroCount);
 
+struct GameInp* AddMacroKeys(struct GameInp* pgi, int nPlayer, int nButtonsTwo[][2], int nButtonsFour[][4], int nPunchInputs[][3], int nKickInputs[][3], const char* system, UINT32& nMacroCount);
 void AssignButtons(const char* system, const char* szName, const char* szInfo, int nPlayer, int i, int nButtons[][4]);
 void AssignButtons(const char* system, const char* szName, const char* szInfo, int nPlayer, int i, int nButtons[][2]);
-
-#define RETRO_DEVICE_ID_3RD_COL_BOTTOM (nDeviceType[nPlayer] == RETROPAD_MODERN ? RETRO_DEVICE_ID_JOYPAD_R2 : RETRO_DEVICE_ID_JOYPAD_R )
-#define RETRO_DEVICE_ID_3RD_COL_TOP    (nDeviceType[nPlayer] == RETROPAD_MODERN ? RETRO_DEVICE_ID_JOYPAD_R  : RETRO_DEVICE_ID_JOYPAD_L )
-#define RETRO_DEVICE_ID_4TH_COL_BOTTOM (nDeviceType[nPlayer] == RETROPAD_MODERN ? RETRO_DEVICE_ID_JOYPAD_L2 : RETRO_DEVICE_ID_JOYPAD_R2)
-#define RETRO_DEVICE_ID_4TH_COL_TOP    (nDeviceType[nPlayer] == RETROPAD_MODERN ? RETRO_DEVICE_ID_JOYPAD_L  : RETRO_DEVICE_ID_JOYPAD_L2)
 
 #endif // MACROKEYS_H

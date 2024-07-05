@@ -199,16 +199,16 @@ static void AnalyzeGameLayout()
 	// We only support macros deemed "most useful" for now
 	for (UINT32 nPlayer = 0; nPlayer < nMaxPlayers; nPlayer++) {
 		if ((nPunchx3[nPlayer] == 7) && (nKickx3[nPlayer] == 7)) {
-			pgi = AddMacroKeys(pgi, nPlayer, nPunchInputs, nKickInputs, nMacroCount);
+			pgi = AddMacroKeys(pgi, nPlayer, NULL, NULL, nPunchInputs, nKickInputs, "streetfighter", nMacroCount);
 		}
 		if (bIsNeogeoCartGame || (nGameType == RETRO_GAME_TYPE_NEOCD)) {
-			pgi = AddMacroKeys(pgi, nPlayer, nNeogeoButtons, nMacroCount);
+			pgi = AddMacroKeys(pgi, nPlayer, NULL, nNeogeoButtons, NULL, NULL, "neogeo", nMacroCount);
 		}
 		if (bIsPgmCartGame) {
-			pgi = AddMacroKeys(pgi, nPlayer, nPgmButtons, nMacroCount);
+			pgi = AddMacroKeys(pgi, nPlayer, NULL, nPgmButtons, NULL, NULL, "pgm", nMacroCount);
 		}
 		if (bIsCps1CartGame) {
-			pgi = AddMacroKeys(pgi, nPlayer, nCps1Buttons, nMacroCount);
+			pgi = AddMacroKeys(pgi, nPlayer, nCps1Buttons, NULL, NULL, NULL, "cps1", nMacroCount);
 		}
 	}
 
