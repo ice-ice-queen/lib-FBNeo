@@ -63,4 +63,5 @@ void SetDefaultDeviceTypes();
 void SetControllerInfo();
 void SetReSetControllers();
 extern bool bStreetFighterLayout;
+extern bool bbIsCps1TraditionCartGame;
 #endif

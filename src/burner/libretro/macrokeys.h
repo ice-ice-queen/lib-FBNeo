@@ -59,9 +59,8 @@ void BindCustomMacroKeys(const CustomMacroKeys& macrosdata, char* description, i
 extern CustomMacroKeys macrodata;
 extern macro_category var_fbneo_macro_categories[];
 
-
 struct GameInp* AddMacroKeys(struct GameInp* pgi, int nPlayer, int nButtonsTwo[][2], int nButtonsFour[][4], int nPunchInputs[][3], int nKickInputs[][3], const char* system, UINT32& nMacroCount);
 void AssignButtons(const char* system, const char* szName, const char* szInfo, int nPlayer, int i, int nButtons[][4]);
-void AssignButtons(const char* system, const char* szName, const char* szInfo, int nPlayer, int i, int nButtons[][2]);
+void AssignButtons(const char* system, const char* szName, const char* szInfo, int nPlayer, int i, int nButtons[][2], INT32 nCps1Tradition[]);
 
 #endif // MACROKEYS_H

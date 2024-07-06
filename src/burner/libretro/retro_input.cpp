@@ -7,6 +7,7 @@
 #include "macrokeys.h"
 
 bool bStreetFighterLayout = false;
+bool bIsCps1TraditionCartGame = false;
 INT32 nInputIntfMouseDivider = 1;
 
 retro_input_state_t input_cb;
@@ -107,12 +108,14 @@ static void AnalyzeGameLayout()
 	INT32 nPunchx3[MAX_PLAYERS] = {0, };
 	INT32 nPunchInputs[MAX_PLAYERS][3];
 	INT32 nKickx3[MAX_PLAYERS] = {0, };
+	INT32 nCps1Tradition[MAX_PLAYERS] = {0, };
 	INT32 nKickInputs[MAX_PLAYERS][3];
 	INT32 nNeogeoButtons[MAX_PLAYERS][4];
 	INT32 nPgmButtons[MAX_PLAYERS][4];
 	INT32 nCps1Buttons[MAX_PLAYERS][2];
 
 	bStreetFighterLayout = false;
+	bIsCps1TraditionCartGame = false;
 	nMahjongKeyboards = 0;
 	bVolumeIsFireButton = false;
 	nFireButtons = 0;
@@ -189,7 +192,7 @@ static void AnalyzeGameLayout()
 				AssignButtons("pgm", bii.szName, bii.szInfo, nPlayer, i, nPgmButtons);
 			}
 			if (bIsCps1CartGame) {
-				AssignButtons("cps1", bii.szName, bii.szInfo, nPlayer, i, nCps1Buttons);
+				AssignButtons("cps1", bii.szName, bii.szInfo, nPlayer, i, nCps1Buttons, nCps1Tradition);
 			}
 		}
 	}
@@ -207,7 +210,7 @@ static void AnalyzeGameLayout()
 		if (bIsPgmCartGame) {
 			pgi = AddMacroKeys(pgi, nPlayer, NULL, nPgmButtons, NULL, NULL, "pgm", nMacroCount);
 		}
-		if (bIsCps1CartGame) {
+		if (nCps1Tradition[0] == 3) {
 			pgi = AddMacroKeys(pgi, nPlayer, nCps1Buttons, NULL, NULL, NULL, "cps1", nMacroCount);
 		}
 	}
@@ -217,6 +220,9 @@ static void AnalyzeGameLayout()
 	}
 	if (nFireButtons >= 5 && (BurnDrvGetHardwareCode() & HARDWARE_PUBLIC_MASK) == HARDWARE_CAPCOM_CPS2 && !bVolumeIsFireButton) {
 		bStreetFighterLayout = true;
+	}
+	if (nCps1Tradition[0] == 3) { // CPS1中按鍵需符合存在Attack 和 Jump
+		bIsCps1TraditionCartGame = true;
 	}
 }
 
@@ -1874,7 +1880,7 @@ static INT32 GameInpSpecialOne(struct GameInp* pgi, INT32 nPlayer, char* szb, ch
 		BindCustomMacroKeys(macrosdata, description, nPlayer, nDeviceType, pgi);
 	}
 
-	if (bIsCps1CartGame) {
+	if (bIsCps1TraditionCartGame) {
 		CustomMacroKeys macrosdata = LoadCustomMacroKeys("cps1");
 		BindCustomMacroKeys(macrosdata, description, nPlayer, nDeviceType, pgi);
 	}

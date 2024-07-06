@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <cstring>
 #include <map>
+#include <algorithm>
 
 const char* neogeo_macro_desc;
 const char* pgm_macro_desc;
@@ -59,15 +60,10 @@ void set_macro_language_strings(UINT32 nLangcode) {
 		"注：键盘使用者请于<快捷菜单→控制>中确认对应键",
 		"註：鍵盤使用者請於<快捷選单→控制器>中確認對應鍵"
 	};
-	const char* macro_info_pgm_button_options[] = {
-		"ABCD represents button 1, button 2, button 3, button 4 in sequence\nNote: Keyboard users, please confirm the corresponding keys in <Quick Menu → Control>",
-		"ABCD依次代表button 1, button 2, button 3, button 4\n注：键盘使用者请于<快捷菜单→控制>中确认对应键",
-		"ABCD依次代button 1, button 2, button 3, button 4\n註：鍵盤使用者請於<快捷選单→控制器>中確認對應鍵"
-	};
 	const char* macro_info_streetfighter_button_options[] = {
-		"ABC represents Weak, Medium, and Strong Punches in sequence\nDEF represents Weak, Medium, and Strong Kicks in sequence\nNote: Keyboard users, please confirm the corresponding keys in <Quick Menu → Control>",
-		"ABC依次代表轻/中/重拳\nDEF依次代表轻/中/重踢\n注：键盘使用者请于<快捷菜单→控制>中确认对应键",
-		"ABC依次代表輕/中/重拳\nDEF依次代表輕/中/重踢\n註：鍵盤使用者請於<快捷選单→控制器>中確認對應鍵"
+		"\"w m s\" represents Weak, Medium, Strong.\"P k\" represents Punch, Kick\nNote: Keyboard users, please confirm the corresponding keys in <Quick Menu → Control>",
+		"\"w m s\"代表轻/中/重。\"P k\"代表拳和踢\n注：键盘使用者请于<快捷菜单→控制>中确认对应键",
+		"\"w m s\"代表輕/中/重。\"P k\"代表拳和踢\n註：鍵盤使用者請於<快捷選单→控制器>中確認對應鍵"
 	};
 	const char* macro_disabled_options[] = {
 		"Disable Combination",
@@ -107,7 +103,6 @@ void set_macro_language_strings(UINT32 nLangcode) {
 	const char* macro_desc_button_l3 = macro_desc_button_l3_options[nLangcode];
 	const char* macro_desc_button_r3 = macro_desc_button_r3_options[nLangcode];
 	const char* macro_info_button = macro_info_button_options[nLangcode];
-	const char* macro_info_pgm_button = macro_info_pgm_button_options[nLangcode];
 	const char* macro_info_streetfighter_button = macro_info_streetfighter_button_options[nLangcode];
 	const char* macro_disabled = macro_disabled_options[nLangcode];
 	neogeo_macro_desc = neogeo_macro_desc_options[nLangcode];
@@ -122,14 +117,14 @@ void set_macro_language_strings(UINT32 nLangcode) {
 			// 全部的11种组合中"Buttons ACD"用不上-感谢ppx的jjsnake帮助查询整理
 			"pgm", "pgm_macro",
 			{
-				{ "fbneo-pgm-macro-l", "L", macro_desc_button_l, macro_info_pgm_button, "Buttons CD",
-					{ { "Buttons AB", NULL }, { "Buttons AC", NULL }, { "Buttons AD", NULL }, { "Buttons BC", NULL }, { "Buttons BD", NULL }, { "Buttons CD", NULL }, { "Buttons ABC", NULL }, { "Buttons ABD", NULL }, { "Buttons BCD", NULL }, { "Buttons ABCD", NULL }, { macro_disabled, NULL }, { NULL, NULL } } },
-				{ "fbneo-pgm-macro-r", "R", macro_desc_button_r, macro_info_pgm_button, "Buttons AB",
-					{ { "Buttons AB", NULL }, { "Buttons AC", NULL }, { "Buttons AD", NULL }, { "Buttons BC", NULL }, { "Buttons BD", NULL }, { "Buttons CD", NULL }, { "Buttons ABC", NULL }, { "Buttons ABD", NULL }, { "Buttons BCD", NULL }, { "Buttons ABCD", NULL }, { macro_disabled, NULL }, { NULL, NULL } } },
-				{ "fbneo-pgm-macro-l2", "L2", macro_desc_button_l2, macro_info_pgm_button, "Buttons BC",
-					{ { "Buttons AB", NULL }, { "Buttons AC", NULL }, { "Buttons AD", NULL }, { "Buttons BC", NULL }, { "Buttons BD", NULL }, { "Buttons CD", NULL }, { "Buttons ABC", NULL }, { "Buttons ABD", NULL }, { "Buttons BCD", NULL }, { "Buttons ABCD", NULL }, { macro_disabled, NULL }, { NULL, NULL } } },
-				{ "fbneo-pgm-macro-r2", "R2", macro_desc_button_r2, macro_info_pgm_button, "Buttons ABC",
-					{ { "Buttons AB", NULL }, { "Buttons AC", NULL }, { "Buttons AD", NULL }, { "Buttons BC", NULL }, { "Buttons BD", NULL }, { "Buttons CD", NULL }, { "Buttons ABC", NULL }, { "Buttons ABD", NULL }, { "Buttons BCD", NULL }, { "Buttons ABCD", NULL }, { macro_disabled, NULL }, { NULL, NULL } } }
+				{ "fbneo-pgm-macro-l", "L", macro_desc_button_l, macro_info_button, "Buttons 3|4",
+					{ { "Buttons 1|2", NULL }, { "Buttons 1|3", NULL }, { "Buttons 1|4", NULL }, { "Buttons 2|3", NULL }, { "Buttons 2|4", NULL }, { "Buttons 3|4", NULL }, { "Buttons 1|2|3", NULL }, { "Buttons 1|2|4", NULL }, { "Buttons 2|3|4", NULL }, { "Buttons 1|2|3|4", NULL }, { macro_disabled, NULL }, { NULL, NULL } } },
+				{ "fbneo-pgm-macro-r", "R", macro_desc_button_r, macro_info_button, "Buttons 1|2",
+					{ { "Buttons 1|2", NULL }, { "Buttons 1|3", NULL }, { "Buttons 1|4", NULL }, { "Buttons 2|3", NULL }, { "Buttons 2|4", NULL }, { "Buttons 3|4", NULL }, { "Buttons 1|2|3", NULL }, { "Buttons 1|2|4", NULL }, { "Buttons 2|3|4", NULL }, { "Buttons 1|2|3|4", NULL }, { macro_disabled, NULL }, { NULL, NULL } } },
+				{ "fbneo-pgm-macro-l2", "L2", macro_desc_button_l2, macro_info_button, "Buttons 2|3",
+					{ { "Buttons 1|2", NULL }, { "Buttons 1|3", NULL }, { "Buttons 1|4", NULL }, { "Buttons 2|3", NULL }, { "Buttons 2|4", NULL }, { "Buttons 3|4", NULL }, { "Buttons 1|2|3", NULL }, { "Buttons 1|2|4", NULL }, { "Buttons 2|3|4", NULL }, { "Buttons 1|2|3|4", NULL }, { macro_disabled, NULL }, { NULL, NULL } } },
+				{ "fbneo-pgm-macro-r2", "R2", macro_desc_button_r2, macro_info_button, "Buttons 1|2|3",
+					{ { "Buttons 1|2", NULL }, { "Buttons 1|3", NULL }, { "Buttons 1|4", NULL }, { "Buttons 2|3", NULL }, { "Buttons 2|4", NULL }, { "Buttons 3|4", NULL }, { "Buttons 1|2|3", NULL }, { "Buttons 1|2|4", NULL }, { "Buttons 2|3|4", NULL }, { "Buttons 1|2|3|4", NULL }, { macro_disabled, NULL }, { NULL, NULL } } },
 			}
 		},
 		{
@@ -150,13 +145,13 @@ void set_macro_language_strings(UINT32 nLangcode) {
 			"cps1", "cps1_macro",
 			{
 				{ "fbneo-cps1-macro-l", "L", macro_desc_button_l, macro_info_button, macro_disabled,
-					{ { "Buttons AB", NULL }, { macro_disabled, NULL }, { NULL, NULL } } },
+					{ { "Buttons Att|Jump", NULL }, { macro_disabled, NULL }, { NULL, NULL } } },
 				{ "fbneo-cps1-macro-r", "R", macro_desc_button_r, macro_info_button, macro_disabled,
-					{ { "Buttons AB", NULL }, { macro_disabled, NULL }, { NULL, NULL } } },
+					{ { "Buttons Att|Jump", NULL }, { macro_disabled, NULL }, { NULL, NULL } } },
 				{ "fbneo-cps1-macro-l2", "L2", macro_desc_button_l2, macro_info_button, macro_disabled,
-					{ { "Buttons AB", NULL }, { macro_disabled, NULL }, { NULL, NULL } } },
-				{ "fbneo-cps1-macro-r2", "R2", macro_desc_button_r2, macro_info_button, "Buttons AB",
-					{ { "Buttons AB", NULL }, { macro_disabled, NULL }, { NULL, NULL } } }
+					{ { "Buttons Att|Jump", NULL }, { macro_disabled, NULL }, { NULL, NULL } } },
+				{ "fbneo-cps1-macro-r2", "R2", macro_desc_button_r2, macro_info_button, "Buttons Att|Jump",
+					{ { "Buttons Att|Jump", NULL }, { macro_disabled, NULL }, { NULL, NULL } } }
 			}
 		},
 		/*6键的57种组合可能，用不上这么多，但是先存着吧
@@ -182,21 +177,17 @@ void set_macro_language_strings(UINT32 nLangcode) {
 			// 全部的57种组合中下述13种组合大概率有效-感谢ppx的jjsnake帮助查询整理
 			"streetfighter", "streetfighter_macro",
 			{
-				{ "fbneo-streetfighter-macro-l2", "L2", macro_desc_button_l2, macro_info_streetfighter_button, "Buttons ABC",
-					{ { "Buttons AB", NULL }, { "Buttons AC", NULL }, { "Buttons AD", NULL }, { "Buttons BC", NULL }, { "Buttons BE", NULL }, { "Buttons CD", NULL }, { "Buttons CE", NULL }, { "Buttons CF", NULL }, { "Buttons DE", NULL }, { "Buttons DF", NULL }, { "Buttons EF", NULL },
-					{ "Buttons ABC", NULL }, { "Buttons DEF", NULL }, { macro_disabled, NULL }, { NULL, NULL } }
+				{ "fbneo-streetfighter-macro-l2", "L2", macro_desc_button_l2, macro_info_streetfighter_button, "Buttons wP|mP|sP",
+					{ { "Buttons wP|mP", NULL }, { "Buttons wP|sP", NULL }, { "Buttons wP|wK", NULL }, { "Buttons mP|sP", NULL }, { "Buttons mP|mK", NULL }, { "Buttons sP|wK", NULL }, { "Buttons sP|mK", NULL }, { "Buttons sP|sK", NULL }, { "Buttons wK|mK", NULL }, { "Buttons wK|sK", NULL }, { "Buttons mK|sK", NULL },{ "Buttons wP|mP|sP", NULL }, { "Buttons wK|mK|sK", NULL }, { macro_disabled, NULL }, { NULL, NULL } }
 				},
-				{ "fbneo-streetfighter-macro-r2", "R2", macro_desc_button_r2, macro_info_streetfighter_button, "Buttons DEF",
-					{ { "Buttons AB", NULL }, { "Buttons AC", NULL }, { "Buttons AD", NULL }, { "Buttons BC", NULL }, { "Buttons BE", NULL }, { "Buttons CD", NULL }, { "Buttons CE", NULL }, { "Buttons CF", NULL }, { "Buttons DE", NULL }, { "Buttons DF", NULL }, { "Buttons EF", NULL },
-					{ "Buttons ABC", NULL }, { "Buttons DEF", NULL }, { macro_disabled, NULL }, { NULL, NULL } }
+				{ "fbneo-streetfighter-macro-r2", "R2", macro_desc_button_r2, macro_info_streetfighter_button, "Buttons wK|mK|sK",
+					{ { "Buttons wP|mP", NULL }, { "Buttons wP|sP", NULL }, { "Buttons wP|wK", NULL }, { "Buttons mP|sP", NULL }, { "Buttons mP|mK", NULL }, { "Buttons sP|wK", NULL }, { "Buttons sP|mK", NULL }, { "Buttons sP|sK", NULL }, { "Buttons wK|mK", NULL }, { "Buttons wK|sK", NULL }, { "Buttons mK|sK", NULL },{ "Buttons wP|mP|sP", NULL }, { "Buttons wK|mK|sK", NULL }, { macro_disabled, NULL }, { NULL, NULL } }
 				},
 				{ "fbneo-streetfighter-macro-l3", "L3", macro_desc_button_l3, macro_info_streetfighter_button, macro_disabled,
-					{ { "Buttons AB", NULL }, { "Buttons AC", NULL }, { "Buttons AD", NULL }, { "Buttons BC", NULL }, { "Buttons BE", NULL }, { "Buttons CD", NULL }, { "Buttons CE", NULL }, { "Buttons CF", NULL }, { "Buttons DE", NULL }, { "Buttons DF", NULL }, { "Buttons EF", NULL },
-					{ "Buttons ABC", NULL }, { "Buttons DEF", NULL }, { macro_disabled, NULL }, { NULL, NULL } }
+					{ { "Buttons wP|mP", NULL }, { "Buttons wP|sP", NULL }, { "Buttons wP|wK", NULL }, { "Buttons mP|sP", NULL }, { "Buttons mP|mK", NULL }, { "Buttons sP|wK", NULL }, { "Buttons sP|mK", NULL }, { "Buttons sP|sK", NULL }, { "Buttons wK|mK", NULL }, { "Buttons wK|sK", NULL }, { "Buttons mK|sK", NULL },{ "Buttons wP|mP|sP", NULL }, { "Buttons wK|mK|sK", NULL }, { macro_disabled, NULL }, { NULL, NULL } }
 				},
 				{ "fbneo-streetfighter-macro-r3", "R3", macro_desc_button_r3, macro_info_streetfighter_button, macro_disabled,
-					{ { "Buttons AB", NULL }, { "Buttons AC", NULL }, { "Buttons AD", NULL }, { "Buttons BC", NULL }, { "Buttons BE", NULL }, { "Buttons CD", NULL }, { "Buttons CE", NULL }, { "Buttons CF", NULL }, { "Buttons DE", NULL }, { "Buttons DF", NULL }, { "Buttons EF", NULL },
-					{ "Buttons ABC", NULL }, { "Buttons DEF", NULL }, { macro_disabled, NULL }, { NULL, NULL } }
+					{ { "Buttons wP|mP", NULL }, { "Buttons wP|sP", NULL }, { "Buttons wP|wK", NULL }, { "Buttons mP|sP", NULL }, { "Buttons mP|mK", NULL }, { "Buttons sP|wK", NULL }, { "Buttons sP|mK", NULL }, { "Buttons sP|sK", NULL }, { "Buttons wK|mK", NULL }, { "Buttons wK|sK", NULL }, { "Buttons mK|sK", NULL },{ "Buttons wP|mP|sP", NULL }, { "Buttons wK|mK|sK", NULL }, { macro_disabled, NULL }, { NULL, NULL } }
 				}
 			}
 		}
@@ -283,37 +274,47 @@ CustomMacroKeys LoadCustomMacroKeys(const char* system) {
 	return macrodata;
 }
 
-// PGM和街霸需要更换一下Description以便符合RA控制器里面的界面统一性
-std::string ReWriteDescription(const std::string& input, const std::string& system) {
-	const std::string prefix = "Buttons ";
-	if (input.find(prefix) == 0) {
-		std::string result = input.substr(prefix.size());
-		if (system == "pgm") {
-			std::replace(result.begin(), result.end(), 'A', '1');
-			std::replace(result.begin(), result.end(), 'B', '2');
-			std::replace(result.begin(), result.end(), 'C', '3');
-			std::replace(result.begin(), result.end(), 'D', '4');
-		} else if (system == "streetfighter") {
-			std::string temp;
-			for (size_t i = 0; i < result.size(); ++i) {
-				if (!temp.empty()) {
-					temp += "|"; // Add a pipe as a separator
-				}
-				switch (result[i]) {
-					case 'A': temp += "wP"; break;
-					case 'B': temp += "mP"; break;
-					case 'C': temp += "sP"; break;
-					case 'D': temp += "wK"; break;
-					case 'E': temp += "mK"; break;
-					case 'F': temp += "sK"; break;
-					default: temp += result[i]; break;
-				}
-			}
-			result = temp;
+// 把原先的"Buttons 1|2"或者"Buttons Att|Jump"换成Buttons AB来处理
+std::string ReWriteMacro(const std::string& input, const std::string& system) {
+	std::string result = input;
+	if (system == "pgm") {
+		for (size_t i = 0; i < result.size(); ++i) {
+			if (result[i] == '1') result[i] = 'A';
+			else if (result[i] == '2') result[i] = 'B';
+			else if (result[i] == '3') result[i] = 'C';
+			else if (result[i] == '4') result[i] = 'D';
 		}
-		return prefix + result;
+	} else if (system == "cps1") {
+		size_t pos;
+		while ((pos = result.find("Att")) != std::string::npos) {
+			result.replace(pos, 3, "A");
+		}
+		while ((pos = result.find("Jump")) != std::string::npos) {
+			result.replace(pos, 4, "B");
+		}
+	} else if (system == "streetfighter") {
+		size_t pos;
+		while ((pos = result.find("wP")) != std::string::npos) {
+			result.replace(pos, 2, "A");
+		}
+		while ((pos = result.find("mP")) != std::string::npos) {
+			result.replace(pos, 2, "B");
+		}
+		while ((pos = result.find("sP")) != std::string::npos) {
+			result.replace(pos, 2, "C");
+		}
+		while ((pos = result.find("wK")) != std::string::npos) {
+			result.replace(pos, 2, "D");
+		}
+		while ((pos = result.find("mK")) != std::string::npos) {
+			result.replace(pos, 2, "E");
+		}
+		while ((pos = result.find("sK")) != std::string::npos) {
+			result.replace(pos, 2, "F");
+		}
 	}
-	return input;
+	result.erase(std::remove(result.begin(), result.end(), '|'), result.end());
+	return result;
 }
 
 // 绑定宏到RA输入设备
@@ -339,39 +340,33 @@ void BindCustomMacroKeys(const CustomMacroKeys& macrosdata, char* description, i
 			if (strcmp("R", button) == 0) {
 				// 此全局变量的创立实为无奈之举，RA手柄会一直刷新，description必须常驻，否则字符串丢失
 				// 前端显示"Buttons AB01-04"毕竟不正规
-				std::string rewrittenDescription = ReWriteDescription(macrosdata.macrocontent[i].macroKey, system);
-				R_button_description = new char[rewrittenDescription.size() + 1];
-				strcpy(R_button_description, rewrittenDescription.c_str());
+				R_button_description = new char[key.size() + 1];
+				strcpy(R_button_description, key.c_str());
 				GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_JOYPAD_R, R_button_description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
 			}
 			if (strcmp("L", button) == 0) {
-				std::string rewrittenDescription = ReWriteDescription(macrosdata.macrocontent[i].macroKey, system);
-				L_button_description = new char[rewrittenDescription.size() + 1];
-				strcpy(L_button_description, rewrittenDescription.c_str());
+				L_button_description = new char[key.size() + 1];
+				strcpy(L_button_description, key.c_str());
 				GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_JOYPAD_L, L_button_description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
 			}
 			if (strcmp("R2", button) == 0) {
-				std::string rewrittenDescription = ReWriteDescription(macrosdata.macrocontent[i].macroKey, system);
-				R2_button_description = new char[rewrittenDescription.size() + 1];
-				strcpy(R2_button_description, rewrittenDescription.c_str());
+				R2_button_description = new char[key.size() + 1];
+				strcpy(R2_button_description, key.c_str());
 				GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_JOYPAD_R2, R2_button_description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
 			}
 			if (strcmp("L2", button) == 0) {
-				std::string rewrittenDescription = ReWriteDescription(macrosdata.macrocontent[i].macroKey, system);
-				L2_button_description = new char[rewrittenDescription.size() + 1];
-				strcpy(L2_button_description, rewrittenDescription.c_str());
+				L2_button_description = new char[key.size() + 1];
+				strcpy(L2_button_description, key.c_str());
 				GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_JOYPAD_L2, L2_button_description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
 			}
 			if (strcmp("R3", button) == 0) {
-				std::string rewrittenDescription = ReWriteDescription(macrosdata.macrocontent[i].macroKey, system);
-				R3_button_description = new char[rewrittenDescription.size() + 1];
-				strcpy(R3_button_description, rewrittenDescription.c_str());
+				R3_button_description = new char[key.size() + 1];
+				strcpy(R3_button_description, key.c_str());
 				GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_JOYPAD_R3, R3_button_description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
 			}
 			if (strcmp("L3", button) == 0) {
-				std::string rewrittenDescription = ReWriteDescription(macrosdata.macrocontent[i].macroKey, system);
-				L3_button_description = new char[rewrittenDescription.size() + 1];
-				strcpy(L3_button_description, rewrittenDescription.c_str());
+				L3_button_description = new char[key.size() + 1];
+				strcpy(L3_button_description, key.c_str());
 				GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_JOYPAD_L3, L3_button_description, RETRO_DEVICE_JOYPAD, GIT_MACRO_AUTO);
 			}
 		}
@@ -395,28 +390,30 @@ void AssignButtons(const char* system, const char* szName, const char* szInfo, i
 			nButtons[nPlayer][3] = i;
 		}
 	} else if (strcmp(system, "pgm") == 0) {
-		if (_stricmp(" fire 1", szInfo + 2) == 0) {
+		if (_stricmp(" Button 1", szName + 2) == 0) {
 			nButtons[nPlayer][0] = i;
 		}
-		if (_stricmp(" fire 2", szInfo + 2) == 0) {
+		if (_stricmp(" Button 2", szName + 2) == 0) {
 			nButtons[nPlayer][1] = i;
 		}
-		if (_stricmp(" fire 3", szInfo + 2) == 0) {
+		if (_stricmp(" Button 3", szName + 2) == 0) {
 			nButtons[nPlayer][2] = i;
 		}
-		if (_stricmp(" fire 4", szInfo + 2) == 0) {
+		if (_stricmp(" Button 4", szName + 2) == 0) {
 			nButtons[nPlayer][3] = i;
 		}
 	}
 }
 // 重载函数-2键
-void AssignButtons(const char* system, const char* szName, const char* szInfo, int nPlayer, int i, int nButtons[][2]) {
+void AssignButtons(const char* system, const char* szName, const char* szInfo, int nPlayer, int i, int nButtons[][2], INT32 nCps1Tradition[]) {
 	if (strcmp(system, "cps1") == 0) {
-		if (_stricmp(" fire 1", szInfo + 2) == 0) {
+		if (_stricmp(" Attack", szName + 2) == 0) {
 			nButtons[nPlayer][0] = i;
+			nCps1Tradition[nPlayer] |= 1;// 此处需要位操作，来确保CPS1的游戏是存在Attack和Jump的，不符合的游戏则排除在传统游戏外
 		}
-		if (_stricmp(" fire 2", szInfo + 2) == 0) {
+		if (_stricmp(" Jump", szName + 2) == 0) {
 			nButtons[nPlayer][1] = i;
+			nCps1Tradition[nPlayer] |= 2;
 		}
 	}
 }
@@ -452,13 +449,14 @@ struct GameInp* AddMacroKeys(struct GameInp* pgi, int nPlayer, int nButtonsTwo[]
 	// 填充组合键的数组和按键值的数组
 	for (int i = 0; i < num_combs; i++) {
 		macros[i] = category->options[0].values[i].value;
+		std::string temp_macro = ReWriteMacro(macros[i], system);// 将"Buttons 1|2"这类替换为"Buttons AB"来填充按键值的数组
 		button_combinations[i] = (int*)malloc(7 * sizeof(int)); // 最大6键+1=7是为了存储 -1 终止符
 		// 此处说明举例：
 		// 会构建如下数组macros[]={"Buttons AB","Buttons BCD"}
 		// 对应button_combinations[]={(0,1,-1),(1,2,3,-1)}
 		// -1占位符用于下方循环的时候直接截断，只处理01或者123也就是AB或者BCD
 		int j = 0;
-		const char* button_str = macros[i] + 8; // 移除开头的 "Buttons " 进行后面按键名的赋值
+		const char* button_str = temp_macro.c_str() + 8; // 移除开头的 "Buttons " 进行后面按键名的赋值
 		if (strstr(button_str, "A") != NULL) button_combinations[i][j++] = 0;
 		if (strstr(button_str, "B") != NULL) button_combinations[i][j++] = 1;
 		if (strstr(button_str, "C") != NULL) button_combinations[i][j++] = 2;

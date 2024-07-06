@@ -52,6 +52,7 @@ bool bAllowDepth32                    = false;
 bool bPatchedRomsetsEnabled           = true;
 bool bLibretroSupportsAudioBuffStatus = false;
 bool bLowPassFilterEnabled            = false;
+extern bool bIsCps1TraditionCartGame;
 UINT32 nVerticalMode                  = 0;
 UINT32 nFrameskip                     = 1;
 INT32 g_audio_samplerate              = 48000;
@@ -1244,7 +1245,7 @@ void set_environment()
 		idx_var = AddMacroOptions("pgm", nbr_pgm_macros, idx_var);
 	}
 
-	if (bIsCps1CartGame) {
+	if (bIsCps1TraditionCartGame) {
 		idx_var = AddMacroOptions("cps1", nbr_cps1_macros, idx_var);
 	}
 
