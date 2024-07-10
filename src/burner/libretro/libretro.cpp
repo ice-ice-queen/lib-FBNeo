@@ -203,6 +203,10 @@ static int nDIPOffset;
 
 const int nConfigMinVersion = 0x020921;
 
+#define MAX_PATH_LENGTH 256
+#define MAX_DAT_FILES 100
+static void deal_hack(const char *filePath, const char *fileDir, char *drvName);
+
 // Read in the config file for the whole application
 INT32 CoreRomPathsLoad()
 {
@@ -2264,8 +2268,89 @@ end:
 	return true;
 }
 
+// ips hack
+static void deal_hack(const char *filePath, const char *fileDir, char *drvName)
+{
+	FILE* fp = fopen(filePath, "rb");
+	if (fp == NULL)
+	{
+		perror("Error opening file");
+		return;
+	}
+
+	char line[MAX_PATH_LENGTH];
+	char *datFiles[MAX_DAT_FILES];
+	INT32 nActive = 0;
+	INT32 nIndex = -1;
+
+	while (fgets(line, sizeof(line), fp))
+	{
+		line[strcspn(line, "\r")] = 0;
+		line[strcspn(line, "\n")] = 0;
+		size_t len = strlen(line);
+
+		if (strncmp(line, "RomName:", 8) == 0 || strncmp(line, "RomName：", 9) == 0) 
+		{
+			char *colon = strchr(line, ':');
+			if (colon == NULL) {
+				colon = &line[10];
+			} else {
+				colon++;
+			}
+			if (colon != NULL)
+			{
+				while (!isalpha(*(colon)) && !isdigit(*(colon)))
+					colon++;
+				strcpy(drvName, colon);
+			}
+		}
+		else if (strncmp(line, "RomData:", 8) == 0 || strncmp(line, "RomData：", 9) == 0) 
+		{
+			char *colon = strchr(line, ':');
+			if (colon == NULL) {
+				colon = &line[10];
+			} else {
+				colon++;
+			}
+			if (colon != NULL)
+			{
+				while (!isalpha(*(colon)) && !isdigit(*(colon)))
+					colon++;
+				strcpy(drvName, colon);
+				memset(szRomdataName, 0, MAX_PATH);
+				// romdata 
+				_stprintf(szRomdataName, _T("%s%s%s"), szAppRomdatasPath, drvName, ".dat");
+				nIndex = 1;
+			}
+		}
+		else if (len > 4 && strcmp(&line[len - 4], ".dat") == 0) 
+		{
+			if (nActive < MAX_DAT_FILES) {
+                datFiles[nActive] = strdup(line);
+                nActive++;
+            } else {
+                perror("Maximum number of .dat files exceeded.\n");
+            }
+		}
+	}
+	fclose(fp);
+
+	INT32 nPatches = prepare_ips_data(fileDir, drvName, datFiles, nActive);
+
+	if (nPatches > 0)
+	{
+		IpsPatchInit();
+	}
+	if (-1 != nIndex)
+	{
+		RomDataInit();
+	}
+}
+
 static int retro_dat_romset_path(const struct retro_game_info* info)
 {
+	
+
 	INT32 nDat = -1, nRet = 0;	// 1: romdata; 2: ips;
 	char szDatDir[MAX_PATH] = { 0 }, szRomset[128] = { 0 }, * pszTmp = NULL;
 	const char* pszExt = strrchr(info->path, '.');
@@ -2277,6 +2362,13 @@ static int retro_dat_romset_path(const struct retro_game_info* info)
 		{
 			strcpy(pszTmp, pszExt);
 			nDat = strcmp(string_to_lower(pszTmp), ".dat");	// 0: *.dat
+			// add .hak
+			if(nDat != 0)
+			{
+				nDat = strcmp(string_to_lower(pszTmp), ".hak"); 
+				if(nDat == 0) 
+					nDat = 9; 								// 9: *.hak
+			}
 			free(pszTmp);
 			pszTmp = NULL;
 		}
@@ -2314,6 +2406,34 @@ static int retro_dat_romset_path(const struct retro_game_info* info)
 		}
 
 		snprintf(szRomsetPath, MAX_PATH - 1, "%s%c%s", szDatDir, PATH_DEFAULT_SLASH_C(), szRomset);
+	}
+	else if (9 == nDat)
+	{
+		const char *dir = NULL;
+		// If system directory is defined use it, ...
+		if (environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &dir) && dir) {
+			memcpy(g_system_dir, dir, sizeof(g_system_dir));
+			HandleMessage(RETRO_LOG_INFO, "Setting system dir to %s\n", g_system_dir);
+		} else {
+			// ... otherwise use rom directory
+			strncpy(g_system_dir, g_rom_dir, sizeof(g_system_dir));
+			HandleMessage(RETRO_LOG_WARN, "System dir not defined => use roms dir %s\n", g_system_dir);
+		}
+		snprintf_nowarn(szAppIpsesPath, sizeof(szAppIpsesPath), "%s%cfbneo%cips%c", g_system_dir, PATH_DEFAULT_SLASH_C(), PATH_DEFAULT_SLASH_C(), PATH_DEFAULT_SLASH_C());
+		snprintf_nowarn(szAppRomdatasPath, sizeof(szAppRomdatasPath), "%s%cfbneo%cromdata%c", g_system_dir, PATH_DEFAULT_SLASH_C(), PATH_DEFAULT_SLASH_C(), PATH_DEFAULT_SLASH_C());
+		
+		char szDatPath[MAX_PATH] = { 0 };
+
+		strcpy(szDatPath, info->path);
+		strcpy(szDatDir, info->path);
+
+		pszTmp = find_last_slash(szDatDir);
+		if (NULL != pszTmp)
+			pszTmp[0] = '\0';
+
+		deal_hack(szDatPath, szDatDir, szRomset);
+
+		sprintf(szRomsetPath, "%s%c%s", szDatDir, PATH_DEFAULT_SLASH_C(), szRomset);
 	}
 	else
 	{
