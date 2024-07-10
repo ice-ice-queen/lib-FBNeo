@@ -240,6 +240,7 @@ extern bool allow_neogeo_mode;
 extern bool core_aspect_par;
 extern bool bAllowDepth32;
 extern bool bPatchedRomsetsEnabled;
+extern bool bDisabledCrcCheck;
 extern bool bLibretroSupportsAudioBuffStatus;
 extern bool bLowPassFilterEnabled;
 extern UINT32 nVerticalMode;
