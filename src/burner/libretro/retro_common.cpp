@@ -49,6 +49,7 @@ bool allow_neogeo_mode                = true;
 bool neogeo_use_specific_default_bios = false;
 bool bAllowDepth32                    = false;
 bool bPatchedRomsetsEnabled           = true;
+bool bDisabledCrcCheck                = true;
 bool bLibretroSupportsAudioBuffStatus = false;
 bool bLowPassFilterEnabled            = false;
 UINT32 nVerticalMode                  = 0;
@@ -236,6 +237,20 @@ static struct retro_core_option_v2_definition var_fbneo_allow_patched_romsets = 
 	"Allow patched romsets",
 	NULL,
 	"Allow romsets from your system/fbneo/patched/ folder to override your romsets, crcs will be ignored but sizes and names must still match, you need to close content for this setting to take effect",
+	NULL,
+	NULL,
+	{
+		{ "disabled", NULL },
+		{ "enabled",  NULL },
+		{ NULL,       NULL },
+	},
+	"enabled"
+};
+static struct retro_core_option_v2_definition var_fbneo_disable_crc_check = {
+	"fbneo_disable_crc_check",
+	"Disable CRC Check",
+	NULL,
+	"Disable CRC Check , crcs will be ignored for romsets",
 	NULL,
 	NULL,
 	{
@@ -912,6 +927,8 @@ void set_environment()
 	var_fbneo_allow_patched_romsets.desc                   = RETRO_PATCHED_CAT_DESC;
 	var_fbneo_allow_patched_romsets.info                   = RETRO_PATCHED_CAT_INFO;
 	vars_systems.push_back(&var_fbneo_allow_patched_romsets);
+
+	vars_systems.push_back(&var_fbneo_disable_crc_check);
 
 	var_fbneo_analog_speed.desc                            = RETRO_ANALOG_CAT_DESC;
 	var_fbneo_analog_speed.info                            = RETRO_ANALOG_CAT_INFO;
@@ -1825,6 +1842,15 @@ void check_variables(void)
 			bPatchedRomsetsEnabled = true;
 		else
 			bPatchedRomsetsEnabled = false;
+	}
+
+	var.key = var_fbneo_disable_crc_check.key;
+	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+	{
+		if (strcmp(var.value, "enabled") == 0)
+			bDisabledCrcCheck = true;
+		else
+			bDisabledCrcCheck = false;
 	}
 
 	if (nGameType != RETRO_GAME_TYPE_NEOCD)
