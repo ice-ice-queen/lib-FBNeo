@@ -505,7 +505,7 @@ extern unsigned int (__cdecl *BurnHighCol) (signed int r, signed int g, signed i
 
 void retro_get_system_info(struct retro_system_info *info)
 {
-	char *library_version = (char*)calloc(22, sizeof(char));
+	char *library_version = (char*)calloc(100, sizeof(char));//  自用改版本号
 
 #ifndef GIT_VERSION
 #define GIT_VERSION ""
@@ -661,12 +661,44 @@ static int create_variables_from_dipswitches()
 				dip_value->friendly_name = dip_value->bdi.szText;
 				dip_value->cond_pgi      = NULL;
 
-				bool is_default_value = (dip_value->pgi->Input.Constant.nConst & dip_value->bdi.nMask) == (dip_value->bdi.nSetting);
+				// 修改DIP中国化开始(注:并非PGM专属，所有含有中国三区的都无脑改了)
+				// 将 option_name 转换为小写
+				std::string option_name_lower = option_name;
+				std::transform(option_name_lower.begin(), option_name_lower.end(), option_name_lower.begin(), ::tolower);
+				bool is_default_value = false;
+				static int highest_priority = -1; // 初始化当前最高优先级
 
-				if (is_default_value)
-				{
-					dip_option->default_bdi = dip_value->bdi;
+				// 检查 option_name 是否包含 "region"，只处理和region有关的
+				if (option_name_lower.find("region") != std::string::npos) {
+					int priority = -1; // 设置优先级标识
+					if (dip_value->friendly_name == "China") {
+						priority = 2;
+					} else if (dip_value->friendly_name == "Taiwan") {
+						priority = 1;
+					} else if (dip_value->friendly_name == "Hong Kong") {
+						priority = 0;
+					}
+
+					// 如果当前优先级高于已设置的最高优先级，则更新默认值，保证优先级china>taiwan>HK
+					if (priority > highest_priority) {
+						is_default_value = true;
+						highest_priority = priority;
+					} else if (priority == -1 && highest_priority == -1) {
+						// 如果没找到中国三个地区则回落到原逻辑
+						is_default_value = (dip_value->pgi->Input.Constant.nConst & dip_value->bdi.nMask) == (dip_value->bdi.nSetting);
+					}
+
+					if (is_default_value) {
+						dip_option->default_bdi = dip_value->bdi;
+					}
+				} else {
+					// 原始条件
+					is_default_value = (dip_value->pgi->Input.Constant.nConst & dip_value->bdi.nMask) == (dip_value->bdi.nSetting);
+					if (is_default_value) {
+						dip_option->default_bdi = dip_value->bdi;
+					}
 				}
+				// 修改DIP中国化结束
 
 				values_count++;
 			}
