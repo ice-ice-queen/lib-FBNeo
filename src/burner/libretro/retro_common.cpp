@@ -926,6 +926,8 @@ void set_environment()
 	var_fbneo_allow_patched_romsets.info                   = RETRO_PATCHED_CAT_INFO;
 	vars_systems.push_back(&var_fbneo_allow_patched_romsets);
 
+	vars_systems.push_back(&var_fbneo_disable_crc_check);
+
 	var_fbneo_analog_speed.desc                            = RETRO_ANALOG_CAT_DESC;
 	var_fbneo_analog_speed.info                            = RETRO_ANALOG_CAT_INFO;
 	vars_systems.push_back(&var_fbneo_analog_speed);
