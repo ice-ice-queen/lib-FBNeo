@@ -393,10 +393,19 @@ static inline void CinpDirectCoord(int port, int axis)
 			if (sAxiBinds[axis].id == RETRO_DEVICE_ID_LIGHTGUN_SCREEN_X) pointerValues[port][0] = (INT32)(width * (double(val)/double(0x10000)));
 			else if (sAxiBinds[axis].id == RETRO_DEVICE_ID_LIGHTGUN_SCREEN_Y) pointerValues[port][1] = (INT32)(height * (double(val)/double(0x10000)));
 		}
-		else if (nDeviceType[port] == RETRO_DEVICE_POINTER || nDeviceType[port] == RETRO_DEVICE_TOUCHSCREEN)
+		else if (nDeviceType[port] == RETRO_DEVICE_POINTER)
 		{
 			if (sAxiBinds[axis].id == RETRO_DEVICE_ID_POINTER_X) pointerValues[port][0] = (INT32)(width * (double(val)/double(0x10000)));
 			else if (sAxiBinds[axis].id == RETRO_DEVICE_ID_POINTER_Y) pointerValues[port][1] = (INT32)(height * (double(val)/double(0x10000)));
+		}
+		else if (nDeviceType[port] == RETRO_DEVICE_TOUCHSCREEN)
+		{
+			unsigned pressed = input_cb_wrapper(port, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_PRESSED);
+			if (pressed)
+			{
+				if (sAxiBinds[axis].id == RETRO_DEVICE_ID_POINTER_X) pointerValues[port][0] = (INT32)(width * (double(val)/double(0x10000)));
+				else if (sAxiBinds[axis].id == RETRO_DEVICE_ID_POINTER_Y) pointerValues[port][1] = (INT32)(height * (double(val)/double(0x10000)));
+			}
 		}
 		else if (nDeviceType[port] == RETROARCADE_GUN)
 		{
@@ -428,7 +437,7 @@ static inline int CinpTouch(int nCode)
 // Analog to analog mapping
 static INT32 GameInpAnalog2RetroInpAnalog(struct GameInp* pgi, unsigned port, unsigned id, int index, char *szn, UINT8 nInput = GIT_JOYAXIS_FULL, INT32 nSliderValue = 0x8000, INT16 nSliderSpeed = 0x0800, INT16 nSliderCenter = 10)
 {
-	if(bButtonMapped || !(pgi->nType & BIT_GROUP_ANALOG)) return 0;
+	if (bButtonMapped || !(pgi->nType & BIT_GROUP_ANALOG)) return 0;
 	if (!bInputInitialized) {
 		// It shouldn't hurt to set both even if we are only gonna use one at once
 		// note : in this port, there is no benefit from making a difference between JoyAxis and MouseAxis ? maybe we should forget about using gameinp.h's structs and define something more "unified" for this port
@@ -505,9 +514,9 @@ static INT32 GameInpAnalog2RetroInpAnalog(struct GameInp* pgi, unsigned port, un
 // Digital to digital mapping
 extern INT32 GameInpDigital2RetroInpKey(struct GameInp* pgi, unsigned port, unsigned id, char *szn, unsigned device = RETRO_DEVICE_JOYPAD, unsigned nInput = GIT_SWITCH)
 {
-	if(bButtonMapped || pgi->nType != BIT_DIGITAL) return 0;
+	if (bButtonMapped || pgi->nType != BIT_DIGITAL) return 0;
 	pgi->nInput = nInput;
-	if(nInput == GIT_SWITCH)
+	if (nInput == GIT_SWITCH)
 	{
 		if (!bInputInitialized) {
 			pgi->Input.Switch.nCode = (UINT16)(nSwitchCode++);
@@ -518,7 +527,7 @@ extern INT32 GameInpDigital2RetroInpKey(struct GameInp* pgi, unsigned port, unsi
 		sKeyBinds[pgi->Input.Switch.nCode].device = device;
 		sKeyBinds[pgi->Input.Switch.nCode].index = -1;
 	}
-	if(nInput == GIT_MACRO_AUTO)
+	if (nInput == GIT_MACRO_AUTO)
 	{
 		if (!bInputInitialized) {
 			pgi->Macro.Switch.nCode = (UINT16)(nSwitchCode++);
@@ -567,7 +576,7 @@ extern INT32 GameInpDigital2RetroInpKey(struct GameInp* pgi, unsigned port, unsi
 // szn is the descriptor text
 static INT32 GameInpDigital2RetroInpAnalogRight(struct GameInp* pgi, unsigned port, unsigned id, unsigned position, char *szn)
 {
-	if(bButtonMapped || pgi->nType != BIT_DIGITAL) return 0;
+	if (bButtonMapped || pgi->nType != BIT_DIGITAL) return 0;
 	pgi->nInput = GIT_SWITCH;
 	if (!bInputInitialized) {
 		pgi->Input.Switch.nCode = (UINT16)(nSwitchCode++);
@@ -595,7 +604,7 @@ static INT32 GameInpDigital2RetroInpAnalogRight(struct GameInp* pgi, unsigned po
 // Digital to digital mapping
 static INT32 GameInpDigital2RetroTouchEvent(struct GameInp* pgi, unsigned port, unsigned count, char *szn)
 {
-	if(bButtonMapped || pgi->nType != BIT_DIGITAL) return 0;
+	if (bButtonMapped || pgi->nType != BIT_DIGITAL) return 0;
 	pgi->nInput = GIT_TOUCH;
 	if (!bInputInitialized) {
 		pgi->Input.Switch.nCode = (UINT16)(nSwitchCode++);
@@ -605,13 +614,7 @@ static INT32 GameInpDigital2RetroTouchEvent(struct GameInp* pgi, unsigned port, 
 	sKeyBinds[pgi->Input.Switch.nCode].port = port;
 	sKeyBinds[pgi->Input.Switch.nCode].device = RETRO_DEVICE_POINTER;
 	sKeyBinds[pgi->Input.Switch.nCode].index = 0;
-	retro_input_descriptor descriptor;
-	descriptor.port = port;
-	descriptor.device = RETRO_DEVICE_POINTER;
-	descriptor.index = 0;
-	descriptor.id = RETRO_DEVICE_ID_POINTER_COUNT;
-	descriptor.description = szn;
-	normal_input_descriptors.push_back(descriptor);
+	// No retro_input_descriptor for touch events ?
 	bButtonMapped = true;
 	return 0;
 }
@@ -744,6 +747,7 @@ static INT32 GameInpSpecialOne(struct GameInp* pgi, INT32 nPlayer, char* szb, ch
 			}
 		}
 	}
+
 	if (nDeviceType[nPlayer] == RETRO_DEVICE_TOUCHSCREEN && BurnGunIsActive()) {
 		if (strcmp("fire 1", szb) == 0 || strcmp("button 1", szb) == 0 || strcmp("button", szb) == 0) {
 			GameInpDigital2RetroTouchEvent(pgi, nPlayer, 1, description);
@@ -3183,10 +3187,10 @@ void InputMake(void)
 void RefreshLightgunCrosshair()
 {
 	if ((BurnDrvGetHardwareCode() & HARDWARE_PUBLIC_MASK) == HARDWARE_NES)
-		bBurnGunHide[0] = (nLightgunCrosshairEmulation == 0 && nDeviceType[1] == RETRO_DEVICE_LIGHTGUN) || (nLightgunCrosshairEmulation == 1);
+		bBurnGunHide[0] = (nLightgunCrosshairEmulation == 0 && (nDeviceType[1] == RETRO_DEVICE_LIGHTGUN || nDeviceType[1] == RETRO_DEVICE_TOUCHSCREEN)) || (nLightgunCrosshairEmulation == 1);
 	else
 		for (int i = 0; i < MAX_GUNS; i++)
-			bBurnGunHide[i] = (nLightgunCrosshairEmulation == 0 && nDeviceType[i] == RETRO_DEVICE_LIGHTGUN) || (nLightgunCrosshairEmulation == 1);
+			bBurnGunHide[i] = (nLightgunCrosshairEmulation == 0 && (nDeviceType[i] == RETRO_DEVICE_LIGHTGUN || nDeviceType[i] == RETRO_DEVICE_TOUCHSCREEN)) || (nLightgunCrosshairEmulation == 1);
 }
 
 void InputInit()
