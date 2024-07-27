@@ -70,7 +70,7 @@ endif
 # Android ARM64 V8A
 ifneq (,$(findstring android,$(platform)))
 ifneq (,$(findstring v8a,$(platform)))
-#在这这里改希望的目标名字
+#在这里改希望的目标名字
 	TARGET := "$(TARGET_NAME)_IPS&ROMDATA_libretro.so"
 	fpic := -fPIC
 	SHARED := -shared -Wl,-no-undefined -Wl,--version-script=$(VERSION_SCRIPT)

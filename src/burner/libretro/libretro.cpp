@@ -1180,6 +1180,7 @@ static bool open_archive()
 				if (index < 0)
 				{
 					if ((g_find_list_path[z].ignoreCrc && bPatchedRomsetsEnabled) ||
+						(bAllowIgnoreCrc && bPatchedRomsetsEnabled) ||							//Allow ignore crc mode
 						((NULL != pDataRomDesc) && (-1 != pRDI->nDescCount)))					// In romdata mode
 					{
 						index = find_rom_by_name(rom_name, list, count, &real_rom_crc);

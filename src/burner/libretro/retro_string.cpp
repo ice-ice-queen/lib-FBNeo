@@ -4,6 +4,7 @@
 #define MAX_LANGUAGES	3
 
 const char *pSelLangStr[NUM_STRING];
+const char *pSelLangStr2[NUM_STRING2];//非官方增加部分
 
 static const char* multi_language_strings[MAX_LANGUAGES][NUM_STRING] = {
 	{
@@ -437,6 +438,22 @@ static const char* multi_language_strings[MAX_LANGUAGES][NUM_STRING] = {
 	}
 };
 
+//非官方增加部分
+static const char* multi_language_strings2[MAX_LANGUAGES][NUM_STRING2] = {
+	{
+		"Allow Ignore CRC",
+		"The prerequisite is to enable 'Allow patched romsets'. Allowing rom with the correct file name and file size to run by ignoring CRC check. \nNote:By ignoring the CRC check, the game content loaded may not align with the intended game content"
+	},
+	{
+		"允许忽略CRC",
+		"先决条件是启用「允许修补集组」。允许通过忽略CRC校验来运行具有正确文件名和文件大小的ROM。\n注意：忽略CRC校验可能会导致加载的游戏内容与预期的游戏内容不匹配"
+	},
+	{
+		"允許忽略CRC",
+		"先决条件是啟用「允許修補集組」。允許通過忽略CRC校驗來運行具有正確文件名和文件大小的ROM。\n注意：忽略CRC校驗可能會導致加載的遊戲內容與預期的遊戲內容不匹配"
+	}
+};
+
 void set_multi_language_strings()
 {
 	UINT32 nLangcode = 0;
@@ -475,8 +492,13 @@ void set_multi_language_strings()
 	for (UINT32 i = 0; i < NUM_STRING; i++)
 		pSelLangStr[i] = multi_language_strings[nLangcode][i];
 
+	//非官方增加部分
+	for (UINT32 i = 0; i < NUM_STRING2; i++)
+		pSelLangStr2[i] = multi_language_strings2[nLangcode][i];
+
 	set_macro_language_strings(nLangcode);
 }
 
 #undef NUM_STRING
+#undef NUM_STRING2
 #undef MAX_LANGUAGES
