@@ -2,8 +2,10 @@
 #define __RETRO_STRING__
 
 #define NUM_STRING	141
+#define NUM_STRING2	2
 
 extern const char* pSelLangStr[NUM_STRING];
+extern const char* pSelLangStr2[NUM_STRING2];//非官方增加部分
 
 void set_multi_language_strings();
 
@@ -152,5 +154,8 @@ void set_multi_language_strings();
 #define RETRO_ERROR_MESSAGES_10				pSelLangStr[139]
 #define RETRO_ERROR_MESSAGES_11				pSelLangStr[140]
 
+/* 非官方增加部分*/
+#define RETRO_IGNORE_CRC_DESC				pSelLangStr2[ 0]
+#define RETRO_IGNORE_CRC_INFO				pSelLangStr2[ 1]
 
 #endif
