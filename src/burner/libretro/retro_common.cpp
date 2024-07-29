@@ -252,7 +252,7 @@ static struct retro_core_option_v2_definition var_fbneo_allow_ignore_crc = {
 	"fbneo-allow-ignore-crc",
 	"Allow Ignore CRC",
 	NULL,
-	"Disable CRC checking, file sizes and names must still match . Enable CRC checking, back to normal check.",
+	"The prerequisite is to enable 'Allow patched romsets'. Allowing rom with the correct file name and file size to run by ignoring CRC check. \nNote:By ignoring the CRC check, the game content loaded may not align with the intended game content",
 	NULL,
 	NULL,
 	{
