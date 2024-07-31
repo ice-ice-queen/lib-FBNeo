@@ -1197,6 +1197,40 @@ void set_environment()
 		option_defs_us[idx_var].desc             = dipswitch_core_options[dip_idx].friendly_name.c_str();
 		option_defs_us[idx_var].desc_categorized = dipswitch_core_options[dip_idx].friendly_name_categorized.c_str();
 		option_defs_us[idx_var].default_value    = dipswitch_core_options[dip_idx].default_bdi.szText;
+
+		// 修改DIP中国化开始(注:并非PGM专属，所有含有中国三区的任意都无脑改了)
+		// 判断区域设置中是否含中国的三个地区（中港台）
+		std::string friendly_name_lower = dipswitch_core_options[dip_idx].friendly_name;
+		std::transform(friendly_name_lower.begin(), friendly_name_lower.end(), friendly_name_lower.begin(), ::tolower);
+		static int highest_priority = -1; // 初始化一个用于比较的最高优先级
+
+		if (friendly_name_lower.find("region") != std::string::npos) {
+			int priority = -1; // 设置优先级标识
+
+			for (int dip_value_idx = 0; dip_value_idx < dipswitch_core_options[dip_idx].values.size(); dip_value_idx++) {
+				std::string value_lower = dipswitch_core_options[dip_idx].values[dip_value_idx].friendly_name;
+				std::transform(value_lower.begin(), value_lower.end(), value_lower.begin(), ::tolower);
+				bool reset_default = false;
+
+				if (value_lower == "china") {
+					priority = 2;
+				} else if (value_lower == "taiwan") {
+					priority = 1;
+				} else if (value_lower == "hong kong") {
+					priority = 0;
+				}
+				// 如果当前优先级高于已设置的最高优先级，则更新默认值，保证优先级china>taiwan>HK
+				if (priority > highest_priority) {
+					reset_default = true;
+					highest_priority = priority;
+				}
+				if (reset_default) {
+					option_defs_us[idx_var].default_value = dipswitch_core_options[dip_idx].values[dip_value_idx].friendly_name.c_str();
+				}
+			}
+		}
+		// 修改DIP中国化结束
+
 		// Instead of filtering out the dips, make the description a warning if it's a neogeo game using a different default bios
 		if (neogeo_use_specific_default_bios && bIsNeogeoCartGame && dipswitch_core_options[dip_idx].friendly_name.compare("[Dipswitch] BIOS") == 0)
 			option_defs_us[idx_var].info         = RETRO_NGBIOS_DEF_INFO_0;
