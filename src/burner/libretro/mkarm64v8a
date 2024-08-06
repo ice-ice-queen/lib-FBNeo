@@ -41,14 +41,15 @@ else
     HOST_PLATFORM := unknown
 endif
 #在下面第一行写NDK_ROOT_DIR变量，也不需要全局做，其他三行是固定的新NDK用的clang目录
-NDK_ROOT_DIR := /home/jsy/android-ndk-r26d
-CC := $(NDK_ROOT_DIR)/toolchains/llvm/prebuilt/${HOST_PLATFORM}-x86_64/bin/aarch64-linux-android21-clang
-CXX := $(NDK_ROOT_DIR)/toolchains/llvm/prebuilt/${HOST_PLATFORM}-x86_64/bin/aarch64-linux-android21-clang++
-CXX11 := $(NDK_ROOT_DIR)/toolchains/llvm/prebuilt/${HOST_PLATFORM}-x86_64/bin/aarch64-linux-android21-clang++
+CC := $(ANDROID_NDK_HOME)/toolchains/llvm/prebuilt/${HOST_PLATFORM}-x86_64/bin/aarch64-linux-android24-clang
+CXX := $(ANDROID_NDK_HOME)/toolchains/llvm/prebuilt/${HOST_PLATFORM}-x86_64/bin/aarch64-linux-android24-clang++
+CXX11 := $(ANDROID_NDK_HOME)/toolchains/llvm/prebuilt/${HOST_PLATFORM}-x86_64/bin/aarch64-linux-android24-clang++
 #在这里直接写目标平台
 platform = android_arm64-v8a
 # Debugging output
 $(info platform: $(platform))
+NDK_VERSION := $(shell echo $(ANDROID_NDK_HOME) | sed 's|.*/android-ndk-\(.*\)|\1|')
+$(info NDK_VERSION is $(NDK_VERSION))  
 
 MAIN_FBNEO_DIR	:= ../..
 VERSION_SCRIPT	:= $(MAIN_FBNEO_DIR)/burner/libretro/link.T
@@ -76,9 +77,16 @@ ifneq (,$(findstring v8a,$(platform)))
 	SHARED := -shared -Wl,-no-undefined -Wl,--version-script=$(VERSION_SCRIPT)
 	ENDIANNESS_DEFINES := -DLSB_FIRST
 	LDFLAGS += -pthread -static-libgcc -static-libstdc++
+	ifeq ($(NDK_VERSION),r22b)
+		LDFLAGS += -ldl
+	endif
 	PLATFORM_DEFINES := -DUSE_SPEEDHACKS -D__LIBRETRO__ -DANDROID -Wno-write-strings -DLSB_FIRST -march=armv8-a
 	CFLAGS += $(PLATFORM_DEFINES)
 	CXXFLAGS += $(PLATFORM_DEFINES)
+	ifeq ($(NDK_VERSION),r22b)
+		CFLAGS += -Wno-unsupported-floating-point-opt
+		CXXFLAGS += -Wno-unsupported-floating-point-opt
+	endif
 	LOCAL_CPP_FEATURES := exceptions rtti
 	LOCAL_DISABLE_FORMAT_STRING_CHECKS := true
 	LOCAL_ARM_MODE := arm
@@ -186,8 +194,6 @@ endif
 
 all: $(TARGET)
 
-
-
 generate-files-clean:
 	rm -rf $(FBNEO_GENERATED_DIR)/
 	rm -rf $(FBNEO_CPU_DIR)/m68k/m68kops.c
@@ -276,6 +282,7 @@ endif
 	# 移动目标到libs/armv64-v8a/下
 	@mkdir -p libs/arm64-v8a
 	@mv $(TARGET) libs/arm64-v8a/
+	# 使用NDK $(NDK_VERSION)编译完毕！
 endif
 
 clean-objs:
