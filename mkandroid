@@ -1,0 +1,104 @@
+# 编译指令提示：make -f mkandroid platform=arm64-v8a j=5
+# 不显示目录进出等信息
+export MAKEFLAGS += --silent
+
+# 定义接受platform和线程数参数的变量，默认为空
+platform ?=
+j        ?=1
+
+# 定义可能的平台目录列表（这里不使用为变量，仅作为列表使用）
+all_platforms := armeabi-v7a arm64-v8a x86 x86_64
+
+# 检查platform变量是否为空，以及是否符合接受的架构之一
+ifeq ($(platform),)
+    APP_ABI_FLAG :=
+else ifeq ($(findstring $(platform), armeabi-v7a arm64-v8a x86 x86_64),)
+    $(error platform值不被允许。只接受'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'中的任意一个)
+else
+    APP_ABI_FLAG = APP_ABI=$(platform)
+endif
+
+# 检查j的值是否在1到10之间
+ifneq (,$(filter-out 1 2 3 4 5 6 7 8 9 10,$(j)))
+    $(error 线程数j必须是1到10之间的数字)
+endif
+
+NDK_BUILD_J_FLAG = -j$(j)
+
+# 定义变量
+CURRENT_DIR := $(shell pwd)
+# jni目录
+JNICALL_DIR := $(CURRENT_DIR)/jni
+# 目标主目录
+LIBS_TARGET_PATH := $(CURRENT_DIR)/libs
+# 编译命令
+COMPILE_CMD := ndk-build $(APP_ABI_FLAG) $(NDK_BUILD_J_FLAG)
+
+# 默认目标
+all: build rename
+
+# 创建临时的Android.mk文件，包含macrokeys.cpp
+create_temp_android_mk:
+	# 检查是否存在Android.mk.backup，并在存在的情况下恢复它
+	@if [ -f "$(JNICALL_DIR)/Android.mk.backup" ]; then \
+		echo "从Android.mk.backup还原Android.mk..."; \
+		mv "$(JNICALL_DIR)/Android.mk.backup" "$(JNICALL_DIR)/Android.mk"; \
+	fi
+	@echo "创建临时的Android.mk..."
+	@cp -f "$(JNICALL_DIR)/Android.mk" "$(JNICALL_DIR)/Android.mk.temp"
+	# 把非官方的cpp文件加入到原编译脚本LOCAL_SRC_FILES的下面一行，添加的行：LOCAL_SRC_FILES+=\$$(LOCAL_PATH)/../macrokeys.cpp
+	@sed -i '/^LOCAL_SRC_FILES/a LOCAL_SRC_FILES+=\$$(LOCAL_PATH)/../macrokeys.cpp' "$(JNICALL_DIR)/Android.mk.temp"
+	# 使用 sed 将两行自定版本号插入到 Android.mk.temp 的顶部
+	@sed -i "1i override GIT_VERSION := \"aGuGu\\\'s FBNeo\"\nCXXFLAGS += -DGIT_VERSION=\"\$$(GIT_VERSION)\"" "$(JNICALL_DIR)/Android.mk.temp"
+	@cd $(JNICALL_DIR) && \
+		mv Android.mk Android.mk.backup && \
+		cp Android.mk.temp Android.mk
+
+build: create_temp_android_mk
+	@echo "编译目标-安卓$(platform)"
+	@echo "运行$(COMPILE_CMD)"
+	@cd $(JNICALL_DIR) && \
+		$(COMPILE_CMD)
+	@cd $(JNICALL_DIR) && \
+		mv Android.mk.backup Android.mk && \
+		rm Android.mk.temp
+
+rename: build
+	@echo "检查编译目标是否成功，并改名核心:"
+	@if [ -z "$(platform)" ]; then \
+		echo "将为所有安卓平台的核心执行重命名操作"; \
+		$(foreach p,$(all_platforms), \
+			if [ -f "$(LIBS_TARGET_PATH)/$(p)/libretro.so" ]; then \
+				echo "编译安卓$(p)目标$(LIBS_TARGET_PATH)/$(p)/libretro.so成功，重命名..."; \
+				mv "$(LIBS_TARGET_PATH)/$(p)/libretro.so" "$(LIBS_TARGET_PATH)/$(p)/fbneo_IPS&ROMDATA_libretro.so"; \
+				echo "\033[33m最终目标$(LIBS_TARGET_PATH)/$(p)/fbneo_IPS&ROMDATA_libretro.so\033[0m"; \
+			else \
+				echo "编译安卓$(p)目标$(LIBS_TARGET_PATH)/$(p)/libretro.so不存在，跳过重命名！"; \
+			fi;) \
+	else \
+		if [ -f "$(LIBS_TARGET_PATH)/$(platform)/libretro.so" ]; then \
+			echo "编译安卓$(platform)目标$(LIBS_TARGET_PATH)/$(platform)/libretro.so成功，重命名..."; \
+			mv "$(LIBS_TARGET_PATH)/$(platform)/libretro.so" "$(LIBS_TARGET_PATH)/$(platform)/fbneo_IPS&ROMDATA_libretro.so"; \
+			echo "\033[33m最终目标$(LIBS_TARGET_PATH)/$(platform)/fbneo_IPS&ROMDATA_libretro.so成功\033[0m"; \
+		else \
+			echo "编译安卓$(platform)目标$(LIBS_TARGET_PATH)/$(platform)/libretro.so不存在，跳过重命名！"; \
+		fi \
+	fi
+
+# 清理构建文件和临时文件
+clean:
+	@echo "清理编译文件..."
+	@cd $(JNICALL_DIR) && ndk-build clean
+	@rm -f $(JNICALL_DIR)/Android.mk.temp
+	@if [ -f "$(JNICALL_DIR)/Android.mk.backup" ]; then \
+		mv "$(JNICALL_DIR)/Android.mk.backup" "$(JNICALL_DIR)/Android.mk"; \
+	fi
+	@if ls "$(CURRENT_DIR)/obj" > /dev/null 2>&1; then \
+		rm -r $(CURRENT_DIR)/obj; \
+	fi
+	@if ls "$(CURRENT_DIR)/libs" > /dev/null 2>&1; then \
+		rm -r $(CURRENT_DIR)/libs; \
+	fi
+	
+
+.PHONY: all build rename clean create_temp_android_mk
