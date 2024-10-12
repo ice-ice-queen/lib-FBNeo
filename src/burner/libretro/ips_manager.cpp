@@ -414,6 +414,46 @@ INT32 apply_ipses_from_variables()
 	return nActiveArray;
 }
 
+INT32 prepare_ips_data(const char *fileDir, char *drvName, char *datFiles[], INT32 nActive)
+{
+	nActiveArray = 0;
+	if (nActive > 0) {
+		pszIpsActivePatches = (TCHAR**)malloc(nActive * sizeof(TCHAR*));
+	}
+
+	TCHAR tmpPath[MAX_PATH] = { 0 };
+    for (int i = 0; i < nActive; i++) {
+		HandleMessage(RETRO_LOG_INFO, "line dat : %s \n", datFiles[i]);
+		_stprintf(tmpPath, _T("%s%s%c%s"),
+					szAppIpsesPath, drvName, PATH_DEFAULT_SLASH_C(), datFiles[i]);
+        FILE* file = _tfopen(tmpPath, _T("r"));
+        if (file) {
+            fclose(file);
+        } else {
+			_stprintf(tmpPath, _T("%s%c%s%c%s%c%s"),
+                      fileDir,
+                      PATH_DEFAULT_SLASH_C(),
+                      _T("ips"),
+                      PATH_DEFAULT_SLASH_C(),
+                      drvName,
+                      PATH_DEFAULT_SLASH_C(),
+                      datFiles[i]);
+		}
+
+        if (NULL != pszIpsActivePatches)
+		{
+			pszIpsActivePatches[nActiveArray] = (TCHAR*)malloc(MAX_PATH * sizeof(TCHAR));
+			memset(pszIpsActivePatches[nActiveArray], 0, MAX_PATH * sizeof(TCHAR));
+			_tcscpy(pszIpsActivePatches[nActiveArray], tmpPath);
+			nActiveArray++;
+		}
+        free(datFiles[i]);
+    }
+
+	HandleMessage(RETRO_LOG_INFO, "Got the patched %d Game driver %s\n", nActiveArray, drvName);
+	return nActiveArray;
+}
+
 static INT32 GetIpsNumActivePatches()
 {
 	if (NULL == pszIpsActivePatches)
