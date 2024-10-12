@@ -1144,7 +1144,7 @@ static bool open_archive()
 
 					bool unknown_crc = false;
 
-					if (index < 0
+					if (index < 0)
 					{
 						if (bDisabledCrcCheck || (g_find_list_path[z].ignoreCrc && bPatchedRomsetsEnabled) ||
 							((NULL != pDataRomDesc) && (-1 != pRDI->nDescCount)))					// In romdata mode
