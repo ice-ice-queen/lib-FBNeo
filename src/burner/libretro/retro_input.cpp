@@ -9,7 +9,6 @@ INT32 nInputIntfMouseDivider = 1;
 retro_input_state_t input_cb;
 static retro_input_poll_t poll_cb;
 
-static unsigned nDiagInputComboStartFrame = 0;
 static unsigned nDiagInputHoldFrameDelay = 0;
 static unsigned nSwitchCode = 0;
 static unsigned nAxisNum = 0;
@@ -38,6 +37,7 @@ static char* pDirections[MAX_PLAYERS][6];
 // Macros
 UINT32 nMacroCount = 0;
 UINT32 nMaxMacro = 0;
+UINT32 nDiagInputHoldCounter = 0;
 
 #define RETRO_DEVICE_ID_3RD_COL_BOTTOM (nDeviceType[nPlayer] == RETROPAD_MODERN ? RETRO_DEVICE_ID_JOYPAD_R2 : RETRO_DEVICE_ID_JOYPAD_R )
 #define RETRO_DEVICE_ID_3RD_COL_TOP    (nDeviceType[nPlayer] == RETROPAD_MODERN ? RETRO_DEVICE_ID_JOYPAD_R  : RETRO_DEVICE_ID_JOYPAD_L )
@@ -552,10 +552,19 @@ static inline void CinpDirectCoord(int port, int axis)
 			if (sAxiBinds[axis].id == RETRO_DEVICE_ID_LIGHTGUN_SCREEN_X) pointerValues[port][0] = (INT32)(width * (double(val)/double(0x10000)));
 			else if (sAxiBinds[axis].id == RETRO_DEVICE_ID_LIGHTGUN_SCREEN_Y) pointerValues[port][1] = (INT32)(height * (double(val)/double(0x10000)));
 		}
-		else if (nDeviceType[port] == RETRO_DEVICE_POINTER || nDeviceType[port] == RETRO_DEVICE_TOUCHSCREEN)
+		else if (nDeviceType[port] == RETRO_DEVICE_POINTER)
 		{
 			if (sAxiBinds[axis].id == RETRO_DEVICE_ID_POINTER_X) pointerValues[port][0] = (INT32)(width * (double(val)/double(0x10000)));
 			else if (sAxiBinds[axis].id == RETRO_DEVICE_ID_POINTER_Y) pointerValues[port][1] = (INT32)(height * (double(val)/double(0x10000)));
+		}
+		else if (nDeviceType[port] == RETRO_DEVICE_TOUCHSCREEN)
+		{
+			unsigned pressed = input_cb_wrapper(port, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_PRESSED);
+			if (pressed)
+			{
+				if (sAxiBinds[axis].id == RETRO_DEVICE_ID_POINTER_X) pointerValues[port][0] = (INT32)(width * (double(val)/double(0x10000)));
+				else if (sAxiBinds[axis].id == RETRO_DEVICE_ID_POINTER_Y) pointerValues[port][1] = (INT32)(height * (double(val)/double(0x10000)));
+			}
 		}
 		else if (nDeviceType[port] == RETROARCADE_GUN)
 		{
@@ -576,13 +585,10 @@ static inline int CinpMouseAxis(int port, int axis)
 
 static inline int CinpTouch(int nCode)
 {
-	unsigned count   = input_cb_wrapper(sKeyBinds[nCode].port, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_COUNT);
-	unsigned pressed = input_cb_wrapper(sKeyBinds[nCode].port, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_PRESSED);
+	unsigned count = input_cb_wrapper(sKeyBinds[nCode].port, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_COUNT);
 
-	if (count > 1 && count <= 4)
+	if (count > 0 && count <= 4)
 		return (count == sKeyBinds[nCode].id);
-	if (sKeyBinds[nCode].id == 1 && pressed)
-		return 1;
 
 	return 0;
 }
@@ -652,7 +658,7 @@ static INT32 GameInpAnalog2RetroInpAnalog(struct GameInp* pgi, unsigned port, un
 			sAxiBinds[pgi->Input.MouseAxis.nAxis].id = id;
 			retro_input_descriptor descriptor;
 			descriptor.port = port;
-			descriptor.device = nDeviceType[port];
+			descriptor.device = (nDeviceType[port] == RETROARCADE_GUN && BurnGunIsActive() ? RETRO_DEVICE_ANALOG : nDeviceType[port]);
 			descriptor.index = index;
 			descriptor.id = id;
 			descriptor.description = szn;
@@ -1135,6 +1141,21 @@ static INT32 GameInpSpecialOne(struct GameInp* pgi, INT32 nPlayer, char* szb, ch
 		}
 		if (strcmp("Fire 3", description) == 0) {
 			GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_JOYPAD_A, "Kick");
+		}
+	}
+
+	// E-Swat - Cyber Police
+	if ((parentrom && strcmp(parentrom, "eswat") == 0) ||
+		(drvname && strcmp(drvname, "eswat") == 0)
+	) {
+		if (strcmp("Fire 1", description) == 0) {
+			GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_JOYPAD_Y, "Special Weapon");
+		}
+		if (strcmp("Fire 2", description) == 0) {
+			GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_JOYPAD_B, "Shoot");
+		}
+		if (strcmp("Fire 3", description) == 0) {
+			GameInpDigital2RetroInpKey(pgi, nPlayer, RETRO_DEVICE_ID_JOYPAD_A, "Jump");
 		}
 	}
 
@@ -2734,6 +2755,14 @@ static INT32 GameInpOtherOne(struct GameInp* pgi, char* szi, char *szn)
 		}
 	}
 
+	// Pu·Li·Ru·La requires this for Stage Select Mode
+	if ((parentrom && strcmp(parentrom, "pulirula") == 0) ||
+		(drvname && strcmp(drvname, "pulirula") == 0)) {
+		if (strcmp("Service", szn) == 0) {
+			GameInpDigital2RetroInpKey(pgi, 0, RETRO_DEVICE_ID_JOYPAD_R3, szn);
+		}
+	}
+
 	// Store the pgi that controls the reset input
 	if (strcmp(szi, "reset") == 0) {
 		pgi->nInput = GIT_SPECIAL_SWITCH;
@@ -2900,15 +2929,14 @@ static bool PollDiagInput()
 
 		if (bDiagComboActivated == false && bAllDiagInputPressed)
 		{
-			if (nDiagInputComboStartFrame == 0) // => User starts holding all the combo inputs
-				nDiagInputComboStartFrame = nCurrentFrame;
-			else if ((nCurrentFrame - nDiagInputComboStartFrame) > nDiagInputHoldFrameDelay) // Delays of the hold reached
+			nDiagInputHoldCounter++;
+			if (nDiagInputHoldCounter > nDiagInputHoldFrameDelay) // Delays of the hold reached
 				bDiagComboActivated = true;
 		}
 		else if (bOneDiagInputPressed == false)
 		{
 			bDiagComboActivated = false;
-			nDiagInputComboStartFrame = 0;
+			nDiagInputHoldCounter = 0;
 		}
 
 		if (bDiagComboActivated)
@@ -3050,6 +3078,8 @@ static void SetFakeInputDescriptors()
 		if (nDeviceType[i] == RETROMOUSE_BALL
 		 || nDeviceType[i] == RETROMOUSE_FULL
 		 || nDeviceType[i] == RETRO_DEVICE_POINTER
+		 || nDeviceType[i] == RETROARCADE_GUN
+		 || nDeviceType[i] == RETRO_DEVICE_TOUCHSCREEN
 		) {
 			continue;
 		}
