@@ -45,13 +45,18 @@ zip, 7z
 
 From the root of the repository, run
 ```
-make -j5 -C src/burner/libretro clean
-make -j5 -C src/burner/libretro generate-files
 make -j5 -C src/burner/libretro
 ```
 Note : `-j5` is to optimize build time on cpus with 4 cores (X+1 cores), you can rise or reduce that value to match your own, however a value too high will increase ram usage and might even cause your system to become unstable.
 
-Note : if you need additional parameters, they must be added to both commands.
+Note : Here is a non-exhaustive list of additional parameters you might want to append to the make command line :
+
+* **SUBSET=all** : Build a core that supports everything. This is the default SUBSET so you don't need to append it.
+* **SUBSET=neogeo** : Build a core that only supports neogeo games.
+* **SUBSET=cps12** : Build a core that only supports CPS-1 & CPS-2 games.
+* **generate-files** : Generate header/gamelist files and stop there.
+* **clean** : Remove any previously built object.
+* **REGEN_HEADERS=1** : This will run **generate-files** and **clean** consecutively before building the core, which is usually required when you made a change to the list of drivers you want to build, either from modifying the project's code or switching between SUBSETs. Note that make version 4.4 may be required for this to behave properly.
 
 ## Building romsets for FBNeo
 
@@ -61,7 +66,7 @@ Don't expect things to work properly if you didn't build valid romsets, and don'
 
 ### Step 1: Obtaining an XML DAT
 
-You can download the dat files for the latest version of the core from the [dats](https://github.com/libretro/FBNeo/tree/master/dats/) directory. Note that some devices (Nintendo 3DS) are running a "light" build with fewer supported games due to memory limitation, the dat files for that build are available from the [light](https://github.com/libretro/FBNeo/tree/master/dats/light/) subdirectory.
+You can download the dat files for the latest version of the core from the [dats](https://github.com/libretro/FBNeo/tree/master/dats/) directory.
 
 ### Step 2: Gathering the ingredients
 
@@ -116,7 +121,7 @@ The following "device type" also exist, but they won't be compatible with every 
 
 The following device types are mostly WIP, they haven't been thoroughly tested and might contain major bugs (please report them) :
 
-* **6-Panel** : assuming you are using a 6-button arcade panel and followed the "YXL as top row and BAR as bottom row" mapping recommendation, it will use R as your 3rd button and Y as your 4th button for anything that isn't a 6-button vsfighting game, note that some users might be more comfortable with Classic/Modern's BAYX's assignment for 4-buttons systems like neogeo.
+* **6-Panel** : assuming you are using a 6-button arcade panel and followed the "YXL as top row and BAR as bottom row" mapping recommendation, it will map the top row then the bottom row as a general rule (with some exceptions), note that some users might be more comfortable with Classic/Modern's BAYX's assignment for 4-buttons systems like neogeo.
 * **Touchscreen** : a variant of the "Pointer" device type meant for mobile devices, touchscreen "tap events" are used for gameplay, "Start" and "Coin" are still assigned to your retropad overlay.
 
 ## Emulating consoles and computers
@@ -133,6 +138,7 @@ You can use specific folder's name for detection, it's the easiest and recommend
 * Nec TurboGrafx-16 : `tg16`
 * Nintendo Entertainment System : `nes`
 * Nintendo Family Disk System : `fds`
+* Super Nintendo Entertainment System : `snes`
 * Sega GameGear : `gamegear`
 * Sega Master System : `sms` | `mastersystem`
 * Sega Megadrive : `megadriv` | `megadrive` | `genesis`
@@ -151,6 +157,7 @@ You can also emulate consoles by prefixing the name of the roms with `XXX_` and 
 * Nec TurboGrafx-16 : `tg`
 * Nintendo Entertainment System : `nes`
 * Nintendo Family Disk System : `fds`
+* Super Nintendo Entertainment System : `snes`
 * Sega GameGear : `gg`
 * Sega Master System : `sms`
 * Sega Megadrive : `md`
@@ -191,6 +198,13 @@ The following bioses are required for some of the emulated systems :
 * spec128.zip (ZX Spectrum 128 BIOS)
 * spec1282a.zip (ZX Spectrum 128 +2a BIOS)
 * channelf.zip (Fairchild Channel F BIOS)
+* dsp1.zip (SNES DSP-1)
+* dsp1b.zip (SNES DSP-1B)
+* dsp2.zip (SNES DSP-2)
+* dsp3.zip (SNES DSP-3)
+* dsp4.zip (SNES DSP-4)
+* st010.zip (SNES Seta ST010)
+* st011.zip (SNES Seta ST011)
 
 ## Samples
 
