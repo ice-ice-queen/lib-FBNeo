@@ -503,7 +503,7 @@ extern unsigned int (__cdecl *BurnHighCol) (signed int r, signed int g, signed i
 
 void retro_get_system_info(struct retro_system_info *info)
 {
-	char *library_version = (char*)calloc(22, sizeof(char));
+	char *library_version = (char*)calloc(100, sizeof(char));//  自用改版本号
 
 #ifndef GIT_VERSION
 #define GIT_VERSION ""
