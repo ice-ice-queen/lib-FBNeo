@@ -196,6 +196,15 @@
 		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
 		<driver status="good"/>
 	</game>
+	<game name="actraiserjte" cloneof="actraiser" romof="actraiser" sourcefile="snes/d_snes.cpp">
+		<comment>Hack, A 'new' english translation, much closer to the Japanese original.</comment>
+		<description>Actraiser (Hack, English)</description>
+		<year>2006</year>
+		<manufacturer>Aeon Genesis</manufacturer>
+		<rom name="Actraiser T-Eng (2006)(Aeon Genesis).sfc" size="1048576" crc="5a6eb990"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
 	<game name="actraiserj" cloneof="actraiser" romof="actraiser" sourcefile="snes/d_snes.cpp">
 		<description>Actraiser (Japan)</description>
 		<year>1990</year>
@@ -1567,6 +1576,14 @@
 		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
 		<driver status="good"/>
 	</game>
+	<game name="brandish2expj" sourcefile="snes/d_snes.cpp">
+		<description>Brandish 2: Expert (Japan)</description>
+		<year>1996</year>
+		<manufacturer>Koei</manufacturer>
+		<rom name="Brandish 2 - Expert (J)(1996)(Koei).sfc" size="3145728" crc="ab43e910"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
 	<game name="brandish2te" sourcefile="snes/d_snes.cpp">
 		<comment>Hack</comment>
 		<description>Brandish 2: The Planet Buster (Hack, English)</description>
@@ -2736,11 +2753,45 @@
 		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
 		<driver status="good"/>
 	</game>
+	<game name="demonscrestr" cloneof="demonscrest" romof="demonscrest" sourcefile="snes/d_snes.cpp">
+		<comment>Hack, An english retranslation, much closer to the Japanese original.</comment>
+		<description>Demon's Crest Retranslation (Hack, English v1.2)</description>
+		<year>2024</year>
+		<manufacturer>RyuHayabusa</manufacturer>
+		<rom name="Demon's Crest Retranslation v1.2 (2024)(RyuHayabusa).sfc" size="2097152" crc="97b9f3d6"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
 	<game name="dennis" sourcefile="snes/d_snes.cpp">
 		<description>Dennis the Menace (USA)</description>
 		<year>1993</year>
 		<manufacturer>Ocean</manufacturer>
 		<rom name="Dennis the Menace (U)(1993)(Ocean).sfc" size="1048576" crc="8ee7faa5"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
+	<game name="derlangte" sourcefile="snes/d_snes.cpp">
+		<comment>Hack</comment>
+		<description>Der Langrisser (Hack, English v1.3.1)</description>
+		<year>2022</year>
+		<manufacturer>Near, D</manufacturer>
+		<rom name="Der Langrisser T-Eng v1.3.1 (2022)(Near, D).sfc" size="4194304" crc="a55f6086"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
+	<game name="derlangtsc" cloneof="derlangte" romof="derlangte" sourcefile="snes/d_snes.cpp">
+		<description>Der Langrisser (Hack, Simplified Chinese v1.31)</description>
+		<year>2015</year>
+		<manufacturer>Hen, Xuejianbingdao</manufacturer>
+		<rom name="Der Langrisser T-Chs v1.31 (2015)(Hen, Xuejianbingdao).sfc" size="4194304" crc="ba4567ca"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
+	<game name="derlangj" cloneof="derlangte" romof="derlangte" sourcefile="snes/d_snes.cpp">
+		<description>Der Langrisser (Japan, Rev. 1)</description>
+		<year>1995</year>
+		<manufacturer>NCS - Masaya</manufacturer>
+		<rom name="Der Langrisser (J, Rev 1)(1995)(NCS - Masaya).sfc" size="2097152" crc="35f9eecc"/>
 		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
 		<driver status="good"/>
 	</game>
@@ -3365,6 +3416,40 @@
 		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
 		<driver status="good"/>
 	</game>
+	<game name="dquest5te" sourcefile="snes/d_snes.cpp">
+		<comment>Hack</comment>
+		<description>Dragon Quest V (Hack, Enflish v2.01 Final)</description>
+		<year>2002</year>
+		<manufacturer>DeJap Translations, Partial Translations</manufacturer>
+		<rom name="Dragon Quest V - Tenkuu no Hanayome T-Eng v2.01 Final (2002)(DeJap Translations).sfc" size="2097152" crc="9400cb3c"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
+	<game name="dquest5j" cloneof="dquest5te" romof="dquest5te" sourcefile="snes/d_snes.cpp">
+		<description>Dragon Quest V - Tenkuu no Hanayome (Japan)</description>
+		<year>1992</year>
+		<manufacturer>Enix</manufacturer>
+		<rom name="Dragon Quest V - Tenkuu no Hanayome (J)(1992)(Enix).sfc" size="1572864" crc="bc955f3b"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
+	<game name="dquest6te" sourcefile="snes/d_snes.cpp">
+		<comment>Hack</comment>
+		<description>Dragon Quest VI (Hack, English v0.90)</description>
+		<year>2001</year>
+		<manufacturer>NoPrgress</manufacturer>
+		<rom name="Dragon Quest VI - Maboroshi no Daichi T-Eng v0.90 (2001)(NoPrgress).sfc" size="4194304" crc="276d9893"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
+	<game name="dquest6j" cloneof="dquest6te" romof="dquest6te" sourcefile="snes/d_snes.cpp">
+		<description>Dragon Quest VI - Maboroshi no Daichi (Japan)</description>
+		<year>1995</year>
+		<manufacturer>Enix</manufacturer>
+		<rom name="Dragon Quest VI - Maboroshi no Daichi (J)(1995)(Enix).sfc" size="4194304" crc="33304519"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
 	<game name="dragonview" sourcefile="snes/d_snes.cpp">
 		<description>Dragon View (USA)</description>
 		<year>1994</year>
@@ -3906,10 +3991,10 @@
 		<driver status="good"/>
 	</game>
 	<game name="finalfantiii" sourcefile="snes/d_snes.cpp">
-		<description>Final Fantasy III (USA)</description>
+		<description>Final Fantasy III (USA, Rev. 1)</description>
 		<year>1994</year>
 		<manufacturer>Squaresoft</manufacturer>
-		<rom name="Final Fantasy III (U)(1994)(Squaresoft).sfc" size="3145728" crc="c0fa0464"/>
+		<rom name="Final Fantasy III (U, Rev 1)(1994)(Squaresoft).sfc" size="3145728" crc="c0fa0464"/>
 		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
 		<driver status="good"/>
 	</game>
@@ -4098,8 +4183,26 @@
 		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
 		<driver status="good"/>
 	</game>
+	<game name="fireemblemtsc" cloneof="fireemblemte" romof="fireemblemte" sourcefile="snes/d_snes.cpp">
+		<comment>Hack</comment>
+		<description>Fire Emblem - Monshou no Nazo (Hack, Simplified Chinese v1.03)</description>
+		<year>2003</year>
+		<manufacturer>Wolf Group</manufacturer>
+		<rom name="Fire Emblem - Monshou no Nazo T-Chs v1.03 (2003)(Wolf Group).sfc" size="3145728" crc="5962b217"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
+	<game name="fireemblemttc" cloneof="fireemblemte" romof="fireemblemte" sourcefile="snes/d_snes.cpp">
+		<comment>Hack</comment>
+		<description>Fire Emblem - Monshou no Nazo (Hack, Traditional Chinese v1.03)</description>
+		<year>2003</year>
+		<manufacturer>Wolf Group</manufacturer>
+		<rom name="Fire Emblem - Monshou no Nazo T-Cht v1.03 (2003)(Wolf Group).sfc" size="3145728" crc="76832422"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
 	<game name="fireemblemj" cloneof="fireemblemte" romof="fireemblemte" sourcefile="snes/d_snes.cpp">
-		<description>Fire Emblem - Monshou no Nazo (Japan)</description>
+		<description>Fire Emblem - Monshou no Nazo (Japan, Rev. 1)</description>
 		<year>1993</year>
 		<manufacturer>Nintendo</manufacturer>
 		<rom name="Fire Emblem - Monshou no Nazo (J, Rev 1)(1993)(Nintendo).sfc" size="3145728" crc="a427b7e6"/>
@@ -4115,12 +4218,56 @@
 		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
 		<driver status="good"/>
 	</game>
+	<game name="fireemblem4tsc" cloneof="fireemblem4j" romof="fireemblem4j" sourcefile="snes/d_snes.cpp">
+		<comment>Hack</comment>
+		<description>Fire Emblem - Seisen no Keifu (Hack, Simplified Chinese v1.1)</description>
+		<year>2008</year>
+		<manufacturer>FIREEMBLEM.NET</manufacturer>
+		<rom name="Fire Emblem - Seisen no Keifu T-Chs v1.1 (2008)(FIREEMBLEM.NET).sfc" size="4194304" crc="58a9a697"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
+	<game name="fireemblem4ttc" cloneof="fireemblem4j" romof="fireemblem4j" sourcefile="snes/d_snes.cpp">
+		<comment>Hack</comment>
+		<description>Fire Emblem - Seisen no Keifu (Hack, Traditional Chinese v1.1)</description>
+		<year>2008</year>
+		<manufacturer>FIREEMBLEM.NET</manufacturer>
+		<rom name="Fire Emblem - Seisen no Keifu T-Cht v1.1 (2008)(FIREEMBLEM.NET).sfc" size="4194304" crc="8ed60773"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
+	<game name="fireemblem4j" sourcefile="snes/d_snes.cpp">
+		<description>Fire Emblem - Seisen no Keifu (Japan)</description>
+		<year>1996</year>
+		<manufacturer>Nintendo</manufacturer>
+		<rom name="Fire Emblem - Seisen no Keifu (Japan)(1996)(Nintendo).sfc" size="4194304" crc="dc0d8cf9"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
 	<game name="fireemblem776te" sourcefile="snes/d_snes.cpp">
 		<comment>Hack</comment>
 		<description>Fire Emblem - Thracia 776 (Hack, English v1.08)</description>
 		<year>2021</year>
 		<manufacturer>Cirosan, Miacis</manufacturer>
 		<rom name="Fire Emblem - Thracia 776 T-Eng v1.08 (2021)(Cirosan, Miacis).sfc" size="6291456" crc="2039d71b"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
+	<game name="fireemblem776tsc" cloneof="fireemblem776te" romof="fireemblem776te" sourcefile="snes/d_snes.cpp">
+		<comment>Hack</comment>
+		<description>Fire Emblem - Thracia 776 (Hack, Simplified Chinese v1.01)</description>
+		<year>2001</year>
+		<manufacturer>Wolf Group</manufacturer>
+		<rom name="Fire Emblem - Thracia 776 T-Chs v1.01 (2001)(Wolf Group).sfc" size="4194304" crc="9618371f"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
+	<game name="fireemblem776ttc" cloneof="fireemblem776te" romof="fireemblem776te" sourcefile="snes/d_snes.cpp">
+		<comment>Hack</comment>
+		<description>Fire Emblem - Thracia 776 (Hack, Traditional Chinese v1.00)</description>
+		<year>2001</year>
+		<manufacturer>Wolf Group</manufacturer>
+		<rom name="Fire Emblem - Thracia 776 T-Cht v1.00 (2001)(Wolf Group).sfc" size="4194304" crc="533b84da"/>
 		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
 		<driver status="good"/>
 	</game>
@@ -4377,6 +4524,15 @@
 		<year>1994</year>
 		<manufacturer>Tradewest</manufacturer>
 		<rom name="Fun 'n Games (USA)(1994)(Tradewest).sfc" size="1048576" crc="5d6deac7"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
+	<game name="mystdung2tsc" cloneof="mystdung2te" romof="mystdung2te" sourcefile="snes/d_snes.cpp">
+		<comment>Hack</comment>
+		<description>Fushigi no Dungeon 2 - Fuurai no Shiren (Hack, Simplified Chinese v1.0)</description>
+		<year>2011</year>
+		<manufacturer>Werther, Phoenix, Kenyo</manufacturer>
+		<rom name="Fushigi no Dungeon 2 - Fuurai no Shiren T-Chs v1.0 (2011)(Werther, Phoenix, Kenyo).sfc" size="4194304" crc="b8d26134"/>
 		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
 		<driver status="good"/>
 	</game>
@@ -5034,6 +5190,15 @@
 		<video type="raster" orientation="horizontal" width="512" height="462" aspectx="4" aspecty="3"/>
 		<driver status="good"/>
 	</game>
+	<game name="heartmemo" sourcefile="snes/d_snes.cpp">
+		<comment>Hack</comment>
+		<description>Heartthrob Memorial: Under the Tree of Legends (Hack, English v3)</description>
+		<year>2022</year>
+		<manufacturer>Translated.Games</manufacturer>
+		<rom name="Heartthrob Memorial - Under the Tree of Legends T-Eng v3 (2022)(Translated.Games).sfc" size="8388608" crc="09392b73"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
 	<game name="hebepopoonj" cloneof="hebepopoone" romof="hebepopoone" sourcefile="snes/d_snes.cpp">
 		<description>Hebereke no Popoon (Japan)</description>
 		<year>1993</year>
@@ -5534,7 +5699,16 @@
 		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
 		<driver status="good"/>
 	</game>
-	<game name="jellyboy2j" sourcefile="snes/d_snes.cpp">
+	<game name="jellyboy2te" sourcefile="snes/d_snes.cpp">
+		<comment>Hack</comment>
+		<description>Jelly Boy 2 (Hack, English)</description>
+		<year>2006</year>
+		<manufacturer>KingMike's Translations</manufacturer>
+		<rom name="Jelly Boy 2 T-Eng (2006)(KingMike's Translations).sfc" size="1572864" crc="a42d70a8"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
+	<game name="jellyboy2j" cloneof="jellyboy2te" romof="jellyboy2te" sourcefile="snes/d_snes.cpp">
 		<description>Jelly Boy 2 (Japan)</description>
 		<year>1994</year>
 		<manufacturer>Epic/Sony Records</manufacturer>
@@ -7058,6 +7232,15 @@
 		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
 		<driver status="good"/>
 	</game>
+	<game name="megamanbass" sourcefile="snes/d_snes.cpp">
+		<comment>Hack</comment>
+		<description>Mega Man &amp; Bass (Hack, English v1.1)</description>
+		<year>2002-2023</year>
+		<manufacturer>Aeon Genesis, Blade133bo</manufacturer>
+		<rom name="Mega Man &amp; Bass T-Eng v1.1 (2002-2023)(Aeon Genesis, Blade133bo).sfc" size="4194304" crc="bb319f69"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
 	<game name="megaman7" sourcefile="snes/d_snes.cpp">
 		<description>Mega Man 7 (USA)</description>
 		<year>1995</year>
@@ -7497,6 +7680,15 @@
 		<year>1995</year>
 		<manufacturer>Williams Entertainment</manufacturer>
 		<rom name="Mortal Kombat 3 (U)(1995)(Williams).sfc" size="4194304" crc="4e6af725"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
+	<game name="mk3ne" cloneof="mk3" romof="mk3" sourcefile="snes/d_snes.cpp">
+		<comment>Hack</comment>
+		<description>Mortal Kombat 3 New Edition (Hack)</description>
+		<year>2025</year>
+		<manufacturer>B-Zero TV</manufacturer>
+		<rom name="Mortal Kombat 3 New Edition (2025)(B-Zero TV).sfc" size="8388608" crc="6e9bed4b"/>
 		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
 		<driver status="good"/>
 	</game>
@@ -9290,7 +9482,7 @@
 		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
 		<driver status="good"/>
 	</game>
-	<game name="rockmanforte" sourcefile="snes/d_snes.cpp">
+	<game name="rockmanforte" cloneof="megamanbass" romof="megamanbass" sourcefile="snes/d_snes.cpp">
 		<description>Rockman &amp; Forte (Japan)</description>
 		<year>1998</year>
 		<manufacturer>Capcom</manufacturer>
@@ -9382,12 +9574,46 @@
 		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
 		<driver status="good"/>
 	</game>
+	<game name="romasaga3tsc" cloneof="romasaga3j" romof="romasaga3j" sourcefile="snes/d_snes.cpp">
+		<comment>Hack</comment>
+		<description>Romancing Sa-Ga 3 (Hack, Simplified Chinese v1.01)</description>
+		<year>2010</year>
+		<manufacturer>Werther Lee</manufacturer>
+		<rom name="Romancing Sa-Ga 3 T-Cht v1.01 (2010)(Werther Lee).sfc" size="4194304" crc="c9a66742"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
+	<game name="romasaga3ttc" cloneof="romasaga3j" romof="romasaga3j" sourcefile="snes/d_snes.cpp">
+		<comment>Hack</comment>
+		<description>Romancing Sa-Ga 3 (Hack, Traditional Chinese v1.01)</description>
+		<year>2010</year>
+		<manufacturer>Werther Lee</manufacturer>
+		<rom name="Romancing Sa-Ga 3 T-Cht v1.01 (2010)(Werther Lee).sfc" size="4194304" crc="c8d13bdb"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
+	<game name="romasaga3j" sourcefile="snes/d_snes.cpp">
+		<description>Romancing Sa-Ga 3 (Japan, Rev. 1)</description>
+		<year>1995</year>
+		<manufacturer>Squaresoft</manufacturer>
+		<rom name="Romancing Sa-Ga 3 (J, Rev 1)(1995)(Squaresoft).sfc" size="4194304" crc="6c50c2cf"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
 	<game name="royalconq" cloneof="kingarthurw" romof="kingarthurw" sourcefile="snes/d_snes.cpp">
 		<comment>'SNES Mouse' compatible game (Set Dipswitches)</comment>
 		<description>Royal Conquest (Japan)</description>
 		<year>1992</year>
 		<manufacturer>Jaleco</manufacturer>
 		<rom name="Royal Conquest (J)(1992)(Jaleco).sfc" size="524288" crc="f60e933e"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
+	<game name="rudraj" cloneof="rudrate" romof="rudrate" sourcefile="snes/d_snes.cpp">
+		<description>Rudra no Hihou (Japan)</description>
+		<year>1996</year>
+		<manufacturer>Squaresoft</manufacturer>
+		<rom name="Rudra no Hihou (J)(1996)(Squaresoft).sfc" size="4194304" crc="5d8cb7ac"/>
 		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
 		<driver status="good"/>
 	</game>
@@ -9503,6 +9729,15 @@
 		<year>1994</year>
 		<manufacturer>Capcom</manufacturer>
 		<rom name="Saturday Night Slam Masters (U)(1994)(Capcom).sfc" size="3145728" crc="54161830"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
+	<game name="saunamarioworld" sourcefile="snes/d_snes.cpp">
+		<comment>Hack, Homebrew, A complete overhaul of Super Mario World</comment>
+		<description>Sauna Mario World 2 (GlobalHack, v1.1)</description>
+		<year>2025</year>
+		<manufacturer>pnaha</manufacturer>
+		<rom name="Sauna Mario World 2 v1.1 (2025)(pnaha).sfc" size="4194304" crc="dc5fef0e"/>
 		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
 		<driver status="good"/>
 	</game>
@@ -9631,6 +9866,14 @@
 		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
 		<driver status="good"/>
 	</game>
+	<game name="sdprettyj" sourcefile="snes/d_snes.cpp">
+		<description>Seifuku Densetsu - Pretty Fighter (Japan)</description>
+		<year>1994</year>
+		<manufacturer>Imagineer</manufacturer>
+		<rom name="Seifuku Densetsu - Pretty Fighter (J)(1994)(Imagineer).sfc" size="2097152" crc="a638bef1"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
 	<game name="seikdens2" cloneof="secretmana" romof="secretmana" sourcefile="snes/d_snes.cpp">
 		<description>Seiken Densetsu 2 (Japan)</description>
 		<year>1993</year>
@@ -9645,6 +9888,15 @@
 		<year>2000</year>
 		<manufacturer>LNF Translations, Neill Corlett, SoM2Freak</manufacturer>
 		<rom name="Seiken Densetsu 3 T-Eng v1.01 (2000)(LNF Translations, Neill Corlett, SoM2Freak).sfc" size="4194304" crc="7dbde871"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
+	<game name="seikdens3ttc" cloneof="seikdens3te" romof="seikdens3te" sourcefile="snes/d_snes.cpp">
+		<comment>Hack</comment>
+		<description>Seiken Densetsu 3 (Hack, Traditional Chinese v1.0)</description>
+		<year>2012</year>
+		<manufacturer>darklink, vinxu</manufacturer>
+		<rom name="Seiken Densetsu 3 T-Cht v1.0 (2012)(darklink, vinxu).sfc" size="4194304" crc="86c49fcd"/>
 		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
 		<driver status="good"/>
 	</game>
@@ -9778,6 +10030,23 @@
 		<year>1992</year>
 		<manufacturer>Atlus Co.</manufacturer>
 		<rom name="Shin Megami Tensei (J)(1992)(Atlus).sfc" size="1572864" crc="90de2c78"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
+	<game name="smtenseiifte" sourcefile="snes/d_snes.cpp">
+		<comment>Hack</comment>
+		<description>Shin Megami Tensei if... (Hack, English)</description>
+		<year>2018</year>
+		<manufacturer>Aeon Genesis</manufacturer>
+		<rom name="Shin Megami Tensei if... T-Eng (2018)(Aeon Genesis).sfc" size="2621440" crc="031f11b7"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
+	<game name="smtenseiifj" cloneof="smtenseiifte" romof="smtenseiifte" sourcefile="snes/d_snes.cpp">
+		<description>Shin Megami Tensei if... (Japan)</description>
+		<year>1994</year>
+		<manufacturer>Atlus Co.</manufacturer>
+		<rom name="Shin Megami Tensei if... (J)(1994)(Atlus).sfc" size="2097152" crc="4dd73cba"/>
 		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
 		<driver status="good"/>
 	</game>
@@ -10086,6 +10355,15 @@
 		<year>1996</year>
 		<manufacturer>Infogrames</manufacturer>
 		<rom name="Smurfs, The - Travel the World (E)(1996)(Infogrames).sfc" size="1310720" crc="22947169"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
+	<game name="smwfnr" sourcefile="snes/d_snes.cpp">
+		<comment>Hack, Homebrew, A complete overhaul of Super Mario World</comment>
+		<description>SMW Friends and Rivalry (GlobalHack, v1.03)</description>
+		<year>2025</year>
+		<manufacturer>Bandicoot</manufacturer>
+		<rom name="SMW Friends and Rivalry v1.03 (2025)(Bandicoot).sfc" size="4194304" crc="5518f889"/>
 		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
 		<driver status="good"/>
 	</game>
@@ -12761,6 +13039,14 @@
 		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
 		<driver status="good"/>
 	</game>
+	<game name="tokimemo" cloneof="heartmemo" romof="heartmemo" sourcefile="snes/d_snes.cpp">
+		<description>Tokimeki Memorial: Densetsu no Ki no Shita de (Japan, Rev. 1)</description>
+		<year>1996</year>
+		<manufacturer>Konami</manufacturer>
+		<rom name="Tokimeki Memorial - Densetsu no Ki no Shita de (J, Rev 1)(1996)(Konami).sfc" size="4194304" crc="ae9f3602"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
 	<game name="tomjerry" sourcefile="snes/d_snes.cpp">
 		<description>Tom &amp; Jerry (USA)</description>
 		<year>1992</year>
@@ -12820,6 +13106,23 @@
 		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
 		<driver status="good"/>
 	</game>
+	<game name="tornekodungtsc" cloneof="tornekodungj" romof="tornekodungj" sourcefile="snes/d_snes.cpp">
+		<comment>Hack</comment>
+		<description>Torneco no Daibouken - Fushigi no Dungeon (Hack, Simplified Chinese v1.0)</description>
+		<year>2025</year>
+		<manufacturer>Xiaoguihun, Feiyuying, Aren</manufacturer>
+		<rom name="Torneco no Daibouken - Fushigi no Dungeon T-Chs v1.0 (2025)(Xiaoguihun, Feiyuying, Aren).sfc" size="2097152" crc="2e14f887"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
+	<game name="tornekodungj" sourcefile="snes/d_snes.cpp">
+		<description>Torneco no Daibouken - Fushigi no Dungeon (Japan)</description>
+		<year>1993</year>
+		<manufacturer>Chun Soft</manufacturer>
+		<rom name="Torneco no Daibouken - Fushigi no Dungeon (J)(1993)(Chun Soft).sfc" size="1572864" crc="654e1be4"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
 	<game name="totalcarnage" sourcefile="snes/d_snes.cpp">
 		<description>Total Carnage (USA)</description>
 		<year>1993</year>
@@ -12837,11 +13140,29 @@
 		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
 		<driver status="good"/>
 	</game>
+	<game name="treashuntgtsc" cloneof="treashuntgte" romof="treashuntgte" sourcefile="snes/d_snes.cpp">
+		<comment>Hack</comment>
+		<description>Treasure Hunter G (Hack, Simplified Chinese v1.0)</description>
+		<year>2012</year>
+		<manufacturer>yiyayiya</manufacturer>
+		<rom name="Treasure Hunter G T-Chs v1.0 (2012)(yiyayiya).sfc" size="4194304" crc="829f6663"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
 	<game name="treashuntgj" cloneof="treashuntgte" romof="treashuntgte" sourcefile="snes/d_snes.cpp">
 		<description>Treasure Hunter G (Japan)</description>
 		<year>1996</year>
 		<manufacturer>Squaresoft</manufacturer>
 		<rom name="Treasure Hunter G (J)(1996)(Squaresoft).sfc" size="3145728" crc="3cceed49"/>
+		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
+		<driver status="good"/>
+	</game>
+	<game name="rudrate" sourcefile="snes/d_snes.cpp">
+		<comment>Hack</comment>
+		<description>Treasure of the Rudras (Hack, English v2.10)</description>
+		<year>2018</year>
+		<manufacturer>Aeon Genesis</manufacturer>
+		<rom name="Treasure of the Rudras T-Eng v2.10 (2018)(Aeon Genesis).sfc" size="4194304" crc="2d7bd150"/>
 		<video type="raster" orientation="horizontal" width="512" height="448" aspectx="4" aspecty="3"/>
 		<driver status="good"/>
 	</game>
