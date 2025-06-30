@@ -1296,7 +1296,7 @@ enum {
 };
 
 struct RewindIndex {
-	UINT32 pos;			// data position in RewindBuffer
+	INT64 pos;			// data position in RewindBuffer
 	INT32 len;			// total buffer length (state + extra data)
 	INT32 state_len;	// buffer length of just state data
 	INT32 this_frame;	// frame # (for input recording sync)
@@ -1307,8 +1307,8 @@ struct RewindIndex {
 };
 
 INT32 bRewindEnabled	= 0;		// for UI Integration
-INT32 nRewindMemory		= 1024;		// for UI
-static UINT32 nRewindTotalAllocated;
+INT64 nRewindMemory		= 1024;		// for UI
+static INT64 nRewindTotalAllocated;
 static INT32 bRewindStatus;			  // ref. enum above
 static INT32 bRewindCancelLatch;
 static INT32 bRewindSingleStepping;
@@ -1460,13 +1460,13 @@ static void StateRewindFrame() // called once per frame (see burner/win32/run.cp
 			if (!RewindBuffer) {
 				if (nRewindTotalAllocated <= 128 * 1024 * 1024) break; // going to be too low to do anything decent!
 				// re-try allocation w/smaller amount.
-				bprintf(0, _T("*** Rewind init-notice: allocation failed (%dMB). retrying with %dMB\n"), nRewindTotalAllocated / (1024 * 1024), (nRewindTotalAllocated / (1024 * 1024)) - 128);
+				bprintf(0, _T("*** Rewind init-notice: allocation failed (%dMB). retrying with %dMB\n"), (int)(nRewindTotalAllocated / (1024 * 1024)), (int)((nRewindTotalAllocated / (1024 * 1024)) - 128));
 				nRewindTotalAllocated -= 128 * 1024 * 1024;
 			}
 		} while (RewindBuffer == NULL);
 
 		if (!RewindBuffer) {
-			bprintf(PRINT_ERROR, _T("*** Rewind init-error: allocation failed. size %dMB\n"), nRewindTotalAllocated / (1024 * 1024));
+			bprintf(PRINT_ERROR, _T("*** Rewind init-error: allocation failed. size %dMB\n"), (int)(nRewindTotalAllocated / (1024 * 1024)));
 			goto superfail;
 		}
 
@@ -1497,7 +1497,7 @@ static void StateRewindFrame() // called once per frame (see burner/win32/run.cp
 
 		switch (bRewindStatus) {
 			case REWINDSTATUS_OK:
-				bprintf(0, _T(" ** Rewind initted, %dMB allocated, state size $%x @ ~%d rewinds.\n"), nRewindTotalAllocated / (1024 * 1024), nTotalLenRewind, nRewindIndexCount);
+				bprintf(0, _T(" ** Rewind initted, %dMB allocated, state size $%x @ ~%d rewinds.\n"), (int)(nRewindTotalAllocated / (1024 * 1024)), nTotalLenRewind, nRewindIndexCount);
 				break;
 			case REWINDSTATUS_BROKEN:
 				bprintf(0, _T(" ** Rewind init failed, disabled for this session\n"));
