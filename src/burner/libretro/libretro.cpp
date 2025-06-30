@@ -27,11 +27,7 @@
 #define STAT_CRC     2
 #define STAT_SMALL   3
 #define STAT_LARGE   4
-
-#ifdef LIGHT
-#undef APP_TITLE
-#define APP_TITLE "FinalBurn Neo Light"
-#endif
+#define STAT_SKIP    5
 
 #ifdef SUBSET
 #undef APP_TITLE
@@ -109,9 +105,6 @@ static void retro_audio_buff_status_cb(bool active, unsigned occupancy, bool und
 
 // Mapping of PC inputs to game inputs
 struct GameInp* GameInp = NULL;
-UINT32 nGameInpCount = 0;
-INT32 nAnalogSpeed = 0x0100;
-INT32 nFireButtons = 0;
 
 char g_driver_name[128];
 char g_rom_dir[MAX_PATH];
@@ -152,7 +145,7 @@ TCHAR szAppBurnVer[16];
 
 static char szRomsetPath[MAX_PATH]        = { 0 };
 
-#define TYPES_MAX	(26)	// Maximum number of machine types
+#define TYPES_MAX	(27)	// Maximum number of machine types
 
 static const TCHAR szTypeEnum[2][TYPES_MAX][13] = {
 	{
@@ -166,6 +159,7 @@ static const TCHAR szTypeEnum[2][TYPES_MAX][13] = {
 		_T("sg1000"),
 		_T("sgx"),			_T("supergrafx"),
 		_T("sms"),			_T("mastersystem"),
+		_T("snes"),
 		_T("spectrum"),		_T("zxspectrum"),
 		_T("tg16"),
 		_T("nes"),
@@ -184,6 +178,7 @@ static const TCHAR szTypeEnum[2][TYPES_MAX][13] = {
 		_T("sg1k_"),
 		_T("sgx_"),			_T("sgx_"),
 		_T("sms_"),			_T("sms_"),
+		_T("snes_"),
 		_T("spec_"),		_T("spec_"),
 		_T("tg_"),
 		_T("nes_"),
@@ -317,7 +312,7 @@ static INT32 __cdecl libretro_bprintf(INT32 nStatus, TCHAR* szFormat, ...)
 	va_list vp;
 
 	// some format specifiers don't translate well into the retro logs, replace them
-	szFormat = string_replace_substring(szFormat, "%S", strlen("%S"), "%s", strlen("%s"));
+	szFormat = string_replace_substring(szFormat, strlen(szFormat), "%S", strlen("%S"), "%s", strlen("%s"));
 
 	// retro logs prefer ending with \n
 	// 2021-10-26: disabled it's causing overflow in a few cases, find a better way to do this...
@@ -484,21 +479,22 @@ void retro_set_environment(retro_environment_t cb)
 		{ "Iso", "ccd|cue",    true, true, true, NULL, 0 },
 	};
 	static const struct retro_subsystem_info subsystems[] = {
-		{ "CBS ColecoVision",              "cv",    subsystem_rom, 1, RETRO_GAME_TYPE_CV    },
-		{ "Fairchild ChannelF",            "chf",   subsystem_rom, 1, RETRO_GAME_TYPE_CHF   },
-		{ "MSX 1",                         "msx",   subsystem_rom, 1, RETRO_GAME_TYPE_MSX   },
-		{ "Nec PC-Engine",                 "pce",   subsystem_rom, 1, RETRO_GAME_TYPE_PCE   },
-		{ "Nec SuperGrafX",                "sgx",   subsystem_rom, 1, RETRO_GAME_TYPE_SGX   },
-		{ "Nec TurboGrafx-16",             "tg16",  subsystem_rom, 1, RETRO_GAME_TYPE_TG    },
-		{ "Nintendo Entertainment System", "nes",   subsystem_rom, 1, RETRO_GAME_TYPE_NES   },
-		{ "Nintendo Family Disk System",   "fds",   subsystem_rom, 1, RETRO_GAME_TYPE_FDS   },
-		{ "Sega GameGear",                 "gg",    subsystem_rom, 1, RETRO_GAME_TYPE_GG    },
-		{ "Sega Master System",            "sms",   subsystem_rom, 1, RETRO_GAME_TYPE_SMS   },
-		{ "Sega Megadrive",                "md",    subsystem_rom, 1, RETRO_GAME_TYPE_MD    },
-		{ "Sega SG-1000",                  "sg1k",  subsystem_rom, 1, RETRO_GAME_TYPE_SG1K  },
-		{ "SNK Neo Geo Pocket",            "ngp",   subsystem_rom, 1, RETRO_GAME_TYPE_NGP   },
-		{ "ZX Spectrum",                   "spec",  subsystem_rom, 1, RETRO_GAME_TYPE_SPEC  },
-		{ "Neogeo CD",                     "neocd", subsystem_iso, 1, RETRO_GAME_TYPE_NEOCD },
+		{ "CBS ColecoVision",                    "cv",    subsystem_rom, 1, RETRO_GAME_TYPE_CV    },
+		{ "Fairchild ChannelF",                  "chf",   subsystem_rom, 1, RETRO_GAME_TYPE_CHF   },
+		{ "MSX 1",                               "msx",   subsystem_rom, 1, RETRO_GAME_TYPE_MSX   },
+		{ "Nec PC-Engine",                       "pce",   subsystem_rom, 1, RETRO_GAME_TYPE_PCE   },
+		{ "Nec SuperGrafX",                      "sgx",   subsystem_rom, 1, RETRO_GAME_TYPE_SGX   },
+		{ "Nec TurboGrafx-16",                   "tg16",  subsystem_rom, 1, RETRO_GAME_TYPE_TG    },
+		{ "Nintendo Entertainment System",       "nes",   subsystem_rom, 1, RETRO_GAME_TYPE_NES   },
+		{ "Nintendo Family Disk System",         "fds",   subsystem_rom, 1, RETRO_GAME_TYPE_FDS   },
+		{ "Super Nintendo Entertainment System", "snes",  subsystem_rom, 1, RETRO_GAME_TYPE_SNES   },
+		{ "Sega GameGear",                       "gg",    subsystem_rom, 1, RETRO_GAME_TYPE_GG    },
+		{ "Sega Master System",                  "sms",   subsystem_rom, 1, RETRO_GAME_TYPE_SMS   },
+		{ "Sega Megadrive",                      "md",    subsystem_rom, 1, RETRO_GAME_TYPE_MD    },
+		{ "Sega SG-1000",                        "sg1k",  subsystem_rom, 1, RETRO_GAME_TYPE_SG1K  },
+		{ "SNK Neo Geo Pocket",                  "ngp",   subsystem_rom, 1, RETRO_GAME_TYPE_NGP   },
+		{ "ZX Spectrum",                         "spec",  subsystem_rom, 1, RETRO_GAME_TYPE_SPEC  },
+		{ "Neogeo CD",                           "neocd", subsystem_iso, 1, RETRO_GAME_TYPE_NEOCD },
 		{ NULL },
 	};
 
@@ -898,19 +894,20 @@ static int archive_load_rom(uint8_t *dest, int *wrote, int i)
 
 	int archive = pRomFind[i].nZip;
 
+	// We want to return an error code even if the rom is not needed, that's what standalone does
+	if (pRomFind[i].nState != STAT_OK)
+		return 1;
+
 	if (ZipOpen((char*)g_find_list_path[archive].path.c_str()) != 0)
 		return 1;
 
 	BurnRomInfo ri = {0};
 	BurnDrvGetRomInfo(&ri, i);
 
-	if (!(ri.nType & BRF_NODUMP))
+	if (ZipLoadFile(dest, ri.nLen, wrote, pRomFind[i].nPos) != 0)
 	{
-		if (ZipLoadFile(dest, ri.nLen, wrote, pRomFind[i].nPos) != 0)
-		{
-			ZipClose();
-			return 1;
-		}
+		ZipClose();
+		return 1;
 	}
 
 	ZipClose();
@@ -1127,16 +1124,18 @@ static bool open_archive()
 				// Try to map the ROMs FBNeo wants to ROMs we find inside our pretty archives ...
 				for (unsigned i = 0; i < nRomCount; i++)
 				{
-					if (pRomFind[i].nState == STAT_OK)
+					// Don't bother with roms that have already been found or are never needed
+					if (pRomFind[i].nState == STAT_OK || pRomFind[i].nState == STAT_SKIP)
 						continue;
 
 					struct BurnRomInfo ri;
 					memset(&ri, 0, sizeof(ri));
 					BurnDrvGetRomInfo(&ri, i);
 
-					if ((ri.nType & BRF_NODUMP) || (ri.nType == 0) || (ri.nLen == 0) || ((NULL == pDataRomDesc) && (-1 == pRDI->nDescCount) && (0 == ri.nCrc)))
+					// If a rom is never needed, let's flag it as skippable
+					if ((ri.nType & BRF_NODUMP) || (ri.nType == 0) || (ri.nLen == 0) || ((NULL == pDataRomDesc) && (0 == ri.nCrc)))
 					{
-						pRomFind[i].nState = STAT_OK;
+						pRomFind[i].nState = STAT_SKIP;
 						continue;
 					}
 
@@ -1161,7 +1160,7 @@ static bool open_archive()
 
 					if (index >= 0)
 					{
-						if ((NULL == pDataRomDesc) && (-1 == pRDI->nDescCount))						// Not in romdata mode
+						if ((NULL == pDataRomDesc))						// Not in romdata mode
 						{
 							if (unknown_crc)
 								HandleMessage(RETRO_LOG_WARN, "[FBNeo] Using ROM with unknown crc 0x%08x and name %s from archive %s\n", real_rom_crc, rom_name, g_find_list_path[z].path.c_str());
@@ -1200,7 +1199,8 @@ static bool open_archive()
 		bool ret = true;
 		for (unsigned i = 0; i < nRomCount; i++)
 		{
-			if (pRomFind[i].nState != STAT_OK)
+			// Neither the available roms nor the unneeded ones should trigger an error here
+			if (pRomFind[i].nState != STAT_OK && pRomFind[i].nState != STAT_SKIP)
 			{
 				struct BurnRomInfo ri;
 				memset(&ri, 0, sizeof(ri));
@@ -1250,71 +1250,68 @@ static void SetRotation()
 	bRotationDone = environ_cb(RETRO_ENVIRONMENT_SET_ROTATION, &rotation);
 }
 
-#ifdef AUTOGEN_DATS
-int CreateAllDatfiles()
+int CreateAllDatfiles(char* dat_folder)
 {
 	INT32 nRet = 0;
 	TCHAR szFilename[MAX_PATH];
 
-#ifdef LIGHT
-	#define DAT_FOLDER "dats/light"
-#else
-	#define DAT_FOLDER "dats"
-#endif
-
-	snprintf_nowarn(szFilename, sizeof(szFilename), "%s%c%s (%s).dat", DAT_FOLDER, PATH_DEFAULT_SLASH_C(), APP_TITLE, "ClrMame Pro XML, Arcade only");
+	snprintf_nowarn(szFilename, sizeof(szFilename), "%s%c%s (%s).dat", dat_folder, PATH_DEFAULT_SLASH_C(), APP_TITLE, "ClrMame Pro XML, Arcade only");
 	create_datfile(szFilename, DAT_ARCADE_ONLY);
 
-	snprintf_nowarn(szFilename, sizeof(szFilename), "%s%c%s (%s).dat", DAT_FOLDER, PATH_DEFAULT_SLASH_C(), APP_TITLE, "ClrMame Pro XML, Megadrive only");
+#ifndef NO_NEOGEO
+	snprintf_nowarn(szFilename, sizeof(szFilename), "%s%c%s (%s).dat", dat_folder, PATH_DEFAULT_SLASH_C(), APP_TITLE, "ClrMame Pro XML, Neogeo only");
+	create_datfile(szFilename, DAT_NEOGEO_ONLY);
+#endif
+
+#ifndef NO_CONSOLES_COMPUTERS
+	snprintf_nowarn(szFilename, sizeof(szFilename), "%s%c%s (%s).dat", dat_folder, PATH_DEFAULT_SLASH_C(), APP_TITLE, "ClrMame Pro XML, Megadrive only");
 	create_datfile(szFilename, DAT_MEGADRIVE_ONLY);
 
-	snprintf_nowarn(szFilename, sizeof(szFilename), "%s%c%s (%s).dat", DAT_FOLDER, PATH_DEFAULT_SLASH_C(), APP_TITLE, "ClrMame Pro XML, Sega SG-1000 only");
+	snprintf_nowarn(szFilename, sizeof(szFilename), "%s%c%s (%s).dat", dat_folder, PATH_DEFAULT_SLASH_C(), APP_TITLE, "ClrMame Pro XML, Sega SG-1000 only");
 	create_datfile(szFilename, DAT_SG1000_ONLY);
 
-	snprintf_nowarn(szFilename, sizeof(szFilename), "%s%c%s (%s).dat", DAT_FOLDER, PATH_DEFAULT_SLASH_C(), APP_TITLE, "ClrMame Pro XML, ColecoVision only");
+	snprintf_nowarn(szFilename, sizeof(szFilename), "%s%c%s (%s).dat", dat_folder, PATH_DEFAULT_SLASH_C(), APP_TITLE, "ClrMame Pro XML, ColecoVision only");
 	create_datfile(szFilename, DAT_COLECO_ONLY);
 
-	snprintf_nowarn(szFilename, sizeof(szFilename), "%s%c%s (%s).dat", DAT_FOLDER, PATH_DEFAULT_SLASH_C(), APP_TITLE, "ClrMame Pro XML, Master System only");
+	snprintf_nowarn(szFilename, sizeof(szFilename), "%s%c%s (%s).dat", dat_folder, PATH_DEFAULT_SLASH_C(), APP_TITLE, "ClrMame Pro XML, Master System only");
 	create_datfile(szFilename, DAT_MASTERSYSTEM_ONLY);
 
-	snprintf_nowarn(szFilename, sizeof(szFilename), "%s%c%s (%s).dat", DAT_FOLDER, PATH_DEFAULT_SLASH_C(), APP_TITLE, "ClrMame Pro XML, Game Gear only");
+	snprintf_nowarn(szFilename, sizeof(szFilename), "%s%c%s (%s).dat", dat_folder, PATH_DEFAULT_SLASH_C(), APP_TITLE, "ClrMame Pro XML, Game Gear only");
 	create_datfile(szFilename, DAT_GAMEGEAR_ONLY);
 
-	snprintf_nowarn(szFilename, sizeof(szFilename), "%s%c%s (%s).dat", DAT_FOLDER, PATH_DEFAULT_SLASH_C(), APP_TITLE, "ClrMame Pro XML, Neogeo only");
-	create_datfile(szFilename, DAT_NEOGEO_ONLY);
-
-	snprintf_nowarn(szFilename, sizeof(szFilename), "%s%c%s (%s).dat", DAT_FOLDER, PATH_DEFAULT_SLASH_C(), APP_TITLE, "ClrMame Pro XML, NeoGeo Pocket Games only");
+	snprintf_nowarn(szFilename, sizeof(szFilename), "%s%c%s (%s).dat", dat_folder, PATH_DEFAULT_SLASH_C(), APP_TITLE, "ClrMame Pro XML, NeoGeo Pocket Games only");
 	create_datfile(szFilename, DAT_NGP_ONLY);
 
-	snprintf_nowarn(szFilename, sizeof(szFilename), "%s%c%s (%s).dat", DAT_FOLDER, PATH_DEFAULT_SLASH_C(), APP_TITLE, "ClrMame Pro XML, Fairchild Channel F Games only");
+	snprintf_nowarn(szFilename, sizeof(szFilename), "%s%c%s (%s).dat", dat_folder, PATH_DEFAULT_SLASH_C(), APP_TITLE, "ClrMame Pro XML, Fairchild Channel F Games only");
 	create_datfile(szFilename, DAT_CHANNELF_ONLY);
 
-#ifndef LIGHT
-	snprintf_nowarn(szFilename, sizeof(szFilename), "%s%c%s (%s).dat", DAT_FOLDER, PATH_DEFAULT_SLASH_C(), APP_TITLE, "ClrMame Pro XML, PC-Engine only");
+	snprintf_nowarn(szFilename, sizeof(szFilename), "%s%c%s (%s).dat", dat_folder, PATH_DEFAULT_SLASH_C(), APP_TITLE, "ClrMame Pro XML, PC-Engine only");
 	create_datfile(szFilename, DAT_PCENGINE_ONLY);
 
-	snprintf_nowarn(szFilename, sizeof(szFilename), "%s%c%s (%s).dat", DAT_FOLDER, PATH_DEFAULT_SLASH_C(), APP_TITLE, "ClrMame Pro XML, TurboGrafx16 only");
+	snprintf_nowarn(szFilename, sizeof(szFilename), "%s%c%s (%s).dat", dat_folder, PATH_DEFAULT_SLASH_C(), APP_TITLE, "ClrMame Pro XML, TurboGrafx16 only");
 	create_datfile(szFilename, DAT_TG16_ONLY);
 
-	snprintf_nowarn(szFilename, sizeof(szFilename), "%s%c%s (%s).dat", DAT_FOLDER, PATH_DEFAULT_SLASH_C(), APP_TITLE, "ClrMame Pro XML, SuprGrafx only");
+	snprintf_nowarn(szFilename, sizeof(szFilename), "%s%c%s (%s).dat", dat_folder, PATH_DEFAULT_SLASH_C(), APP_TITLE, "ClrMame Pro XML, SuprGrafx only");
 	create_datfile(szFilename, DAT_SGX_ONLY);
 
-	snprintf_nowarn(szFilename, sizeof(szFilename), "%s%c%s (%s).dat", DAT_FOLDER, PATH_DEFAULT_SLASH_C(), APP_TITLE, "ClrMame Pro XML, NES Games only");
+	snprintf_nowarn(szFilename, sizeof(szFilename), "%s%c%s (%s).dat", dat_folder, PATH_DEFAULT_SLASH_C(), APP_TITLE, "ClrMame Pro XML, NES Games only");
 	create_datfile(szFilename, DAT_NES_ONLY);
 
-	snprintf_nowarn(szFilename, sizeof(szFilename), "%s%c%s (%s).dat", DAT_FOLDER, PATH_DEFAULT_SLASH_C(), APP_TITLE, "ClrMame Pro XML, FDS Games only");
+	snprintf_nowarn(szFilename, sizeof(szFilename), "%s%c%s (%s).dat", dat_folder, PATH_DEFAULT_SLASH_C(), APP_TITLE, "ClrMame Pro XML, FDS Games only");
 	create_datfile(szFilename, DAT_FDS_ONLY);
 
-	snprintf_nowarn(szFilename, sizeof(szFilename), "%s%c%s (%s).dat", DAT_FOLDER, PATH_DEFAULT_SLASH_C(), APP_TITLE, "ClrMame Pro XML, MSX 1 Games only");
+	snprintf_nowarn(szFilename, sizeof(szFilename), "%s%c%s (%s).dat", dat_folder, PATH_DEFAULT_SLASH_C(), APP_TITLE, "ClrMame Pro XML, SNES Games only");
+	create_datfile(szFilename, DAT_SNES_ONLY);
+
+	snprintf_nowarn(szFilename, sizeof(szFilename), "%s%c%s (%s).dat", dat_folder, PATH_DEFAULT_SLASH_C(), APP_TITLE, "ClrMame Pro XML, MSX 1 Games only");
 	create_datfile(szFilename, DAT_MSX_ONLY);
 
-	snprintf_nowarn(szFilename, sizeof(szFilename), "%s%c%s (%s).dat", DAT_FOLDER, PATH_DEFAULT_SLASH_C(), APP_TITLE, "ClrMame Pro XML, ZX Spectrum Games only");
+	snprintf_nowarn(szFilename, sizeof(szFilename), "%s%c%s (%s).dat", dat_folder, PATH_DEFAULT_SLASH_C(), APP_TITLE, "ClrMame Pro XML, ZX Spectrum Games only");
 	create_datfile(szFilename, DAT_SPECTRUM_ONLY);
 #endif
 
 	return nRet;
 }
-#endif
 
 void retro_init()
 {
@@ -1336,7 +1333,7 @@ void retro_init()
 	snprintf_nowarn(szAppBurnVer, sizeof(szAppBurnVer), "%x.%x.%x.%02x", nBurnVer >> 20, (nBurnVer >> 16) & 0x0F, (nBurnVer >> 8) & 0xFF, nBurnVer & 0xFF);
 	BurnLibInit();
 #ifdef AUTOGEN_DATS
-	CreateAllDatfiles();
+	CreateAllDatfiles("dats");
 #endif
 
 	nFrameskipType             = 0;
@@ -1410,12 +1407,12 @@ void retro_reset()
 	}
 
 	// romdata & ips patches run!
-	if ((-1 != nIndex) || (nPatches > 0))
+	if ((nIndex >= 0) || (nPatches > 0))
 	{
 		retro_incomplete_exit();
 
 		if (nPatches > 0) IpsPatchInit();
-		if (-1 != nIndex) RomDataInit();
+		if (nIndex >= 0) RomDataInit();
 
 		retro_load_game_common();
 	} 
@@ -1597,14 +1594,18 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
 	if (nBurnDrvActive != ~0U)
 	{
 		BurnDrvGetAspect(&game_aspect_x, &game_aspect_y);
-
+#if 0
 		// if game is vertical and rotation couldn't occur, "fix" the rotated aspect ratio
+		// note (2025-02-12): apparently, nowaday, retroarch rotates the aspect ratio automatically
+		//                    if the rotation couldn't occur, so this code isn't necessary anymore,
+		//                    and actually became harmful for users with disabled rotation
 		if ((BurnDrvGetFlags() & BDF_ORIENTATION_VERTICAL) && !bRotationDone)
 		{
 			int temp = game_aspect_x;
 			game_aspect_x = game_aspect_y;
 			game_aspect_y = temp;
 		}
+#endif
 	}
 	else
 	{
@@ -2209,11 +2210,7 @@ static bool retro_load_game_common()
 	else
 	{
 		const char* s1 = RETRO_ERROR_MESSAGES_09;
-#ifndef LIGHT
 		const char* s2 = "\n";
-#else
-		const char* s2 = RETRO_ERROR_MESSAGES_10;
-#endif
 		const char* s3 = RETRO_ERROR_MESSAGES_07;
 
 		static char uguiText[4096];
@@ -2511,6 +2508,10 @@ bool retro_load_game(const struct retro_game_info *info)
 		HandleMessage(RETRO_LOG_INFO, "[FBNeo] subsystem fds identified from parent folder\n");
 		if (strncmp(g_driver_name, "fds_", 4) != 0) prefix = "fds_";
 	}
+	if(strcmp(g_rom_parent_dir, "snes")==0) {
+		HandleMessage(RETRO_LOG_INFO, "[FBNeo] subsystem snes identified from parent folder\n");
+		if (strncmp(g_driver_name, "snes_", 4) != 0) prefix = "snes_";
+	}
 	if(strcmp(g_rom_parent_dir, "ngp")==0) {
 		HandleMessage(RETRO_LOG_INFO, "[FBNeo] subsystem ngp identified from parent folder\n");
 		if (strncmp(g_driver_name, "ngp_", 4) != 0) prefix = "ngp_";
@@ -2576,6 +2577,9 @@ bool retro_load_game_special(unsigned game_type, const struct retro_game_info *i
 			break;
 		case RETRO_GAME_TYPE_FDS:
 			prefix = "fds_";
+			break;
+		case RETRO_GAME_TYPE_SNES:
+			prefix = "snes_";
 			break;
 		case RETRO_GAME_TYPE_NGP:
 			prefix = "ngp_";

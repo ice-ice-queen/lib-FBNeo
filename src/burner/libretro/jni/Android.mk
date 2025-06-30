@@ -12,6 +12,7 @@ USE_CYCLONE               := 0
 
 ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
   HAVE_NEON               := 1
+  #INCLUDE_7Z_SUPPORT      := 0
   #USE_CYCLONE             := 1
 endif
 
@@ -23,6 +24,7 @@ SOURCES_CXX :=
 FBNEO_DEFINES :=
 
 include $(LOCAL_PATH)/../Makefile.common
+include $(LOCAL_PATH)/../Makefile.all
 
 COMMON_FLAGS := -DUSE_SPEEDHACKS -D__LIBRETRO__ -DANDROID -Wno-write-strings -DLSB_FIRST $(FBNEO_DEFINES)
 

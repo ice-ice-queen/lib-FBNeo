@@ -1,6 +1,9 @@
 #include "burner.h"
 
+// GameGenie stuff is handled a little differently..
 #define HW_NES ( ((BurnDrvGetHardwareCode() & HARDWARE_PUBLIC_MASK) == HARDWARE_NES) || ((BurnDrvGetHardwareCode() & HARDWARE_PUBLIC_MASK) == HARDWARE_FDS) )
+#define HW_SNES ( ((BurnDrvGetHardwareCode() & HARDWARE_PUBLIC_MASK) == HARDWARE_SNES) )
+#define HW_GGENIE ( HW_NES || HW_SNES )
 
 static bool SkipComma(TCHAR** s)
 {
@@ -70,9 +73,23 @@ static INT32 ConfigParseFile(TCHAR* pszFilename)
 
 	CheatInfo* pCurrentCheat = NULL;
 
-	FILE* h = _tfopen(pszFilename, _T("rt"));
+	TCHAR* pszReadMode = AdaptiveEncodingReads(pszFilename);
+	if (NULL == pszReadMode) pszReadMode = _T("rt");
+
+	FILE* h = _tfopen(pszFilename, pszReadMode);
 	if (h == NULL) {
-		return 1;
+		if ((BurnDrvGetFlags() & BDF_CLONE) && BurnDrvGetText(DRV_PARENT)) {
+			TCHAR szAlternative[MAX_PATH] = { 0 };
+			_stprintf(szAlternative, _T("%s%s.ini"), szAppCheatsPath, BurnDrvGetText(DRV_PARENT));
+
+			pszReadMode = AdaptiveEncodingReads(szAlternative);
+			if (NULL == pszReadMode) pszReadMode = _T("rt");
+
+			if (NULL == (h = _tfopen(szAlternative, pszReadMode)))
+				return 1;
+		} else {
+			return 1;	// Parent driver
+		}
 	}
 
 	while (1) {
@@ -228,7 +245,7 @@ static INT32 ConfigParseFile(TCHAR* pszFilename)
 					INT32 nCPU = 0, nAddress = 0, nValue = 0;
 
 					if (SkipComma(&s)) {
-						if (HW_NES) {
+						if (HW_GGENIE) {
 							t = s;
 							INT32 newlen = 0;
 #if defined(BUILD_WIN32)
@@ -237,7 +254,7 @@ static INT32 ConfigParseFile(TCHAR* pszFilename)
 							for (INT32 z = 0; z < strlen(t); z++) {
 #endif
 								char c = toupper((char)*s);
-								if (c >= 'A' && c <= 'Z' && newlen < 10)
+								if ( ((c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || (c == '-' || c == ':')) && newlen < 10)
 									pCurrentCheat->pOption[n]->AddressInfo[nCurrentAddress].szGenieCode[newlen++] = c;
 								s++;
 								if (*s == _T(',')) break;
@@ -326,9 +343,23 @@ static INT32 ConfigParseFile(TCHAR* pszFilename)
 //TODO: make cross platform
 static INT32 ConfigParseNebulaFile(TCHAR* pszFilename)
 {
-	FILE *fp = _tfopen(pszFilename, _T("rt"));
+	TCHAR* pszReadMode = AdaptiveEncodingReads(pszFilename);
+	if (NULL == pszReadMode) pszReadMode = _T("rt");
+
+	FILE *fp = _tfopen(pszFilename, pszReadMode);
 	if (fp == NULL) {
-		return 1;
+		if ((BurnDrvGetFlags() & BDF_CLONE) && BurnDrvGetText(DRV_PARENT)) {
+			TCHAR szAlternative[MAX_PATH] = { 0 };
+			_stprintf(szAlternative, _T("%s%s.dat"), szAppCheatsPath, BurnDrvGetText(DRV_PARENT));
+
+			pszReadMode = AdaptiveEncodingReads(szAlternative);
+			if (NULL == pszReadMode) pszReadMode = _T("rt");
+
+			if (NULL == (fp = _tfopen(szAlternative, pszReadMode)))
+				return 1;
+		} else {
+			return 1;	// Parent driver
+		}
 	}
 
 	INT32 nLen;
@@ -475,6 +506,13 @@ static INT32 ConfigParseMAMEFile_internal(FILE *fz, const TCHAR *name)
 		nCurrentAddress++;	\
 	}	\
 
+#define AddressInfoGameGenie() { \
+		pCurrentCheat->pOption[n]->AddressInfo[nCurrentAddress].nTotalByte = 1;	\
+		pCurrentCheat->pOption[n]->AddressInfo[nCurrentAddress].nAddress = 0xffff; \
+		strcpy(pCurrentCheat->pOption[n]->AddressInfo[nCurrentAddress].szGenieCode, szGGenie); \
+		nCurrentAddress++;	\
+	}
+
 #define OptionName(a)	\
 	if (pCurrentCheat->pOption[n] == NULL) {						\
 		pCurrentCheat->pOption[n] = (CheatOption*)malloc(sizeof(CheatOption));		\
@@ -490,6 +528,7 @@ static INT32 ConfigParseMAMEFile_internal(FILE *fz, const TCHAR *name)
 	TCHAR tmp2[256];
 	TCHAR gName[64];
 	TCHAR szLine[1024];
+	char szGGenie[128] = { 0, };
 
 	INT32 nLen;
 	INT32 n = 0;
@@ -557,8 +596,10 @@ static INT32 ConfigParseMAMEFile_internal(FILE *fz, const TCHAR *name)
 		tmpcpy(2);						// cheat address
 #if defined(BUILD_WIN32)
 		_stscanf (tmp, _T("%x"), &nAddress);
+		strcpy(szGGenie, TCHARToANSI(tmp, NULL, 0));
 #else
 		sscanf (tmp, _T("%x"), &nAddress);
+		strcpy(szGGenie, tmp);
 #endif
 
 		tmpcpy(3);						// cheat value
@@ -587,7 +628,11 @@ static INT32 ConfigParseMAMEFile_internal(FILE *fz, const TCHAR *name)
 
 		if ( flags & 0x00008000 || (flags & 0x00010000 && !menu)) { // Linked cheat "(2/2) etc.."
 			if (nCurrentAddress < CHEAT_MAX_ADDRESS) {
-				AddressInfo();
+				if (HW_GGENIE) {
+					AddressInfoGameGenie();
+				} else {
+					AddressInfo();
+				}
 			}
 
 			continue;
@@ -631,7 +676,7 @@ static INT32 ConfigParseMAMEFile_internal(FILE *fz, const TCHAR *name)
 
 			OptionName(_T("Disabled"));
 
-			if (nAddress) {
+			if (nAddress || HW_GGENIE) {
 				if ((flags & 0x80018) == 0 && nAttrib != 0xffffffff) {
 					pCurrentCheat->bWriteWithMask = 1; // nAttrib field is the mask
 				}
@@ -669,12 +714,20 @@ static INT32 ConfigParseMAMEFile_internal(FILE *fz, const TCHAR *name)
 						n++;
 						nCurrentAddress = 0;
 						OptionName(tmp2);
-						AddressInfo();
+						if (HW_GGENIE) {
+							AddressInfoGameGenie();
+						} else {
+							AddressInfo();
+						}
 					}
 				} else {
 					n++;
 					OptionName(tmp);
-					AddressInfo();
+					if (HW_GGENIE) {
+						AddressInfoGameGenie();
+					} else {
+						AddressInfo();
+					}
 				}
 			} else {
 				menu = 1;
@@ -710,7 +763,11 @@ static INT32 ConfigParseMAMEFile_internal(FILE *fz, const TCHAR *name)
 			}
 
 			OptionName(tmp);
-			AddressInfo();
+			if (HW_GGENIE) {
+				AddressInfoGameGenie();
+			} else {
+				AddressInfo();
+			}
 
 			continue;
 		}
@@ -725,9 +782,18 @@ static INT32 ConfigParseMAMEFile_internal(FILE *fz, const TCHAR *name)
 static INT32 ConfigParseMAMEFile()
 {
 	TCHAR szFileName[MAX_PATH] = _T("");
-	_stprintf(szFileName, _T("%scheat.dat"), szAppCheatsPath);
+	if (HW_NES) {
+		_stprintf(szFileName, _T("%scheatnes.dat"), szAppCheatsPath);
+	} else if (HW_SNES) {
+		_stprintf(szFileName, _T("%scheatsnes.dat"), szAppCheatsPath);
+	} else {
+		_stprintf(szFileName, _T("%scheat.dat"), szAppCheatsPath);
+	}
 
-	FILE *fz = _tfopen(szFileName, _T("rt"));
+	TCHAR* pszReadMode = AdaptiveEncodingReads(szFileName);
+	if (NULL == pszReadMode) pszReadMode = _T("rt");
+
+	FILE *fz = _tfopen(szFileName, pszReadMode);
 
 	INT32 ret = 1;
 
