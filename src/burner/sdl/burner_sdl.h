@@ -16,12 +16,12 @@ typedef struct tagRECT
 	int bottom;
 } RECT, * PRECT, * LPRECT;
 typedef const RECT* LPCRECT;
+typedef UINT32 DWORD;
+typedef UINT8 BYTE;
 #else
 #include <windows.h>
 #endif
 
-typedef unsigned long   DWORD;
-typedef unsigned char   BYTE;
 
 #ifndef MAX_PATH
 #define MAX_PATH    511

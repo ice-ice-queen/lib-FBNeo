@@ -1081,6 +1081,13 @@ void ppu_write(uint8_t adr, uint8_t val) {
       break;
     }
     case 0x04: {
+      //bprintf(0, _T("oamdata_w: %x @ %x (buf: %x)  %d,%d  (high: %x  second: %x)\n"), val, oamAdr, oamBuffer, snes->hPos / 4, snes->vPos, oamInHigh, oamSecondWrite);
+      if (!snes->inVblank && !forcedBlank && (snes->vramhack & 2)) { // hack for uniracers
+        oamInHigh  = true;
+        oamSecondWrite = false;
+        oamBuffer = val;
+        oamAdr = 0xc;
+      }
       if(oamInHigh) {
         highOam[((oamAdr & 0xf) << 1) | oamSecondWrite] = val;
         if(oamSecondWrite) {
@@ -1187,7 +1194,7 @@ void ppu_write(uint8_t adr, uint8_t val) {
     }
     case 0x18: {
       uint16_t vramAdr = ppu_getVramRemap();
-	  if (forcedBlank || snes->inVblank) { // TODO: also cgram and oam?
+	  if (forcedBlank || snes->inVblank || (snes->vramhack & 1)) { // TODO: also cgram and oam?
 		  vram[vramAdr & 0x7fff] = (vram[vramAdr & 0x7fff] & 0xff00) | val;
 	  }
       if(!vramIncrementOnHigh) vramPointer += vramIncrement;
@@ -1195,7 +1202,7 @@ void ppu_write(uint8_t adr, uint8_t val) {
     }
     case 0x19: {
       uint16_t vramAdr = ppu_getVramRemap();
-	  if (forcedBlank || snes->inVblank) {
+	  if (forcedBlank || snes->inVblank || snes->vramhack & 1) { // DrvDips[0] & 1 == Allow invalid vram writes, some hack games need this
 		  vram[vramAdr & 0x7fff] = (vram[vramAdr & 0x7fff] & 0x00ff) | (val << 8);
 	  }
       if(vramIncrementOnHigh) vramPointer += vramIncrement;

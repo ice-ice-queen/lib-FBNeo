@@ -472,20 +472,33 @@ static INT32 cartridge_load(UINT8* ROMData, UINT32 ROMSize, UINT32 ROMCRC)
 	}
 
 	Cart.PRGRomMask = Cart.PRGRomSize - 1;
+
 	Cart.WorkRAMMask = Cart.WorkRAMSize - 1;
+	if (Cart.WorkRAMSize > 0x2000) {
+		// we need to mask addr 6000-7fff, any thing larger than 0x2000
+		// will need the default mask of 0x1fff for this to work properly.
+		// note: the extra ram still can be used by mappers, etc.
+		// note2: VS. System uses 0x800 bytes wram, mirrored across 6000-7fff
+		Cart.WorkRAMMask = 0x1fff;
+	}
 
 	// Game-specific stuff:
 	// Mapper 7 or 4-way mirroring usually gets no workram (6000-7fff)
-	if (Cart.Mapper == 7 || (Cart.Mirroring == 4 && !(PPUType > RP2C02)))
+	if (Cart.Mapper == 7 || (Cart.Mirroring == 4 && ((PPUType == RP2C02) && !Cart.BatteryBackedSRAM ) )) {
 		NESMode |= NO_WORKRAM; // VS. is exempt from this limitation.
+	}
 
 	NESMode |= (ROMCRC == 0xab29ab28) ? BUS_CONFLICTS : 0; // Dropzone
 	NESMode |= (ROMCRC == 0xe3a6d7f6) ? BUS_CONFLICTS : 0; // Cybernoid
 	NESMode |= (ROMCRC == 0x552a903a) ? BUS_CONFLICTS : 0; // Huge Insect
 	NESMode |= (ROMCRC == 0xb90a1ca1) ? NO_WORKRAM : 0; // Low G Man
 	NESMode |= (ROMCRC == 0xa905cc12) ? NO_WORKRAM : 0; // Bill & Ted
+	NESMode |= (ROMCRC == 0x45b1869a) ? APU_HACKERY : 0; // rgbleek
+	NESMode |= (ROMCRC == 0xa94b4cbb) ? APU_HACKERY : 0; // famidash
+	NESMode |= (ROMCRC == 0x6a90da54) ? APU_HACKERY : 0; // famidashb
 	NESMode |= (ROMCRC == 0xc00c4ea5) ? APU_HACKERY : 0; // Sam's Journey
 	NESMode |= (ROMCRC == 0x585f3500) ? ALT_MMC3 : 0; // Darkwing Duck (T-Chi)
+	NESMode |= (ROMCRC == 0x2d826113) ? ALT_MMC3 : 0; // cybercoaster
 	NESMode |= (ROMCRC == 0x38f65b2d) ? BAD_HOMEBREW : 0; // Battler (HB)
 	NESMode |= (ROMCRC == 0x7946fe78) ? ALT_TIMING : 0; // ftkantaro53
 	NESMode |= (ROMCRC == 0xf167590d) ? ALT_TIMING : 0; // jay and silent bob (occasional hang on level transition w/o this)
@@ -507,6 +520,7 @@ static INT32 cartridge_load(UINT8* ROMData, UINT32 ROMSize, UINT32 ROMCRC)
 	NESMode |= (ROMCRC == 0xab862073) ? ALT_TIMING : 0; // ultimate frogger champ.
 	NESMode |= (ROMCRC == 0x2a798367) ? ALT_TIMING : 0; // jy 45-in-1
 	NESMode |= (ROMCRC == 0xb9fd4de8) ? ALT_TIMING : 0; // over obj (glitch as boss materializes w/o this)
+	NESMode |= (ROMCRC == 0x516843ef) ? (SHOW_OVERSCAN) : 0; // Cobol (HB)
 	NESMode |= (ROMCRC == 0xb4255e99) ? (IS_PAL | SHOW_OVERSCAN) : 0; // Moonglow (HB)
 	NESMode |= (ROMCRC == 0x78716f4f) ? RAM_RANDOM : 0; // Go! Dizzy Go!
 	NESMode |= (ROMCRC == 0x8c4f37e2) ? RAM_RANDOM : 0; // Minna no Taabou no Nakayoshi Daisakusen (Japan)
@@ -535,9 +549,16 @@ static INT32 cartridge_load(UINT8* ROMData, UINT32 ROMSize, UINT32 ROMCRC)
 	NESMode |= (ROMCRC == 0xab21ab5f) ? IS_PAL : 0; // Noah's Ark
 	NESMode |= (ROMCRC == 0xab29ab28) ? IS_PAL : 0; // Dropzone
 	NESMode |= (ROMCRC == 0xde7e6767) ? IS_PAL : 0; // Asterix
+	NESMode |= (ROMCRC == 0x9b4877e5) ? IS_PAL : 0; // Asterixec
 	NESMode |= (ROMCRC == 0xdc7a16e6) ? IS_PAL : 0; // Parasol Stars
 	NESMode |= (ROMCRC == 0xfac97247) ? IS_PAL : 0; // Rainbow Islands (Ocean)
+	NESMode |= (ROMCRC == 0x391be891) ? IS_PAL : 0; // Sensible Soccer
 	NESMode |= (ROMCRC == 0x732b1a7a) ? IS_PAL : 0; // Smurfs, The
+
+	if (nScreenHeight >= SCREEN_HEIGHT_PAL && !(NESMode & SHOW_OVERSCAN) && !(NESMode & IS_PAL)) { // cobol overscan collides with.....
+		bprintf(0, _T("*  PAL mode detected!\n"));
+		NESMode |= IS_PAL;
+	}
 
 	if (NESMode) {
 		bprintf(0, _T("Game-specific configuration:\n"));
@@ -1051,6 +1072,11 @@ static void mapper_map_chr(INT32 pagesz, INT32 slot, INT32 bank)
 
 #define MAP_CHR_RAMROM_DEBUG 0
 
+#if MAP_CHR_RAMROM_DEBUG
+static INT32 debug_chr_slots[8] = { -1, };
+static INT32 debug_chr_types[8] = { -1, };
+#endif
+
 static void mapper_map_chr_ramrom(INT32 pagesz, INT32 slot, INT32 bank, INT32 type)
 {
 	if (type > MEM_ROM) {
@@ -1058,7 +1084,13 @@ static void mapper_map_chr_ramrom(INT32 pagesz, INT32 slot, INT32 bank, INT32 ty
 	}
 
 #if MAP_CHR_RAMROM_DEBUG
-	bprintf(0, _T("mapper_map_chr_ramrom(%x, %x, %x, %x)\n"), pagesz, slot, bank, type);
+	INT32 debug_spew = (debug_chr_slots[slot & 0x7] != bank) ||
+		(debug_chr_types[slot & 0x7] != type);
+	if (debug_spew) {
+		debug_chr_slots[slot & 0x07] = bank;
+		debug_chr_types[slot & 0x07] = type;
+		bprintf(0, _T("mapper_map_chr_ramrom(%x, %x, %x, %S) - scanline %d\n"), pagesz, slot, bank, (type == MEM_ROM) ? "ROM" : "RAM", scanline);
+	}
 #endif
 
 	for (UINT32 i = 0; i < pagesz; i++) {
@@ -1067,7 +1099,8 @@ static void mapper_map_chr_ramrom(INT32 pagesz, INT32 slot, INT32 bank, INT32 ty
 				CHRMap[pagesz * slot + i] = (pagesz * 1024 * bank + 1024 * i) % Cart.CHRRomSize;
 				CHRType[pagesz * slot + i] = MEM_ROM;
 #if MAP_CHR_RAMROM_DEBUG
-				bprintf(0, _T("ROM: CHRMap[%x] = %x\n"),pagesz * slot + i, (pagesz * 1024 * bank + 1024 * i) % Cart.CHRRomSize);
+				if (debug_spew)
+					bprintf(0, _T("ROM: CHRMap[%x] = %x\n"),pagesz * slot + i, (pagesz * 1024 * bank + 1024 * i) % Cart.CHRRomSize);
 #endif
 				break;
 
@@ -1076,12 +1109,21 @@ static void mapper_map_chr_ramrom(INT32 pagesz, INT32 slot, INT32 bank, INT32 ty
 				CHRMap[pagesz * slot + i] = (pagesz * 1024 * bank + 1024 * i) % Cart.CHRRamSize;
 				CHRType[pagesz * slot + i] = type;
 #if MAP_CHR_RAMROM_DEBUG
-				bprintf(0, _T("RAM: CHRMap[%x] = %x\n"),pagesz * slot + i, (pagesz * 1024 * bank + 1024 * i) % Cart.CHRRamSize);
+				if (debug_spew)
+					bprintf(0, _T("RAM: CHRMap[%x] = %x\n"),pagesz * slot + i, (pagesz * 1024 * bank + 1024 * i) % Cart.CHRRamSize);
 #endif
 				break;
 		}
 	}
 }
+
+// FIND_CHEAT_ROMOFFSET helps to find the rom offset of gamegenie cheats
+// when an address hits :)
+#define FIND_CHEAT_ROMOFFSET 0
+
+#if FIND_CHEAT_ROMOFFSET
+static int l_address, l_offset;
+#endif
 
 static UINT8 mapper_prg_read_int(UINT16 address) // mapper_prg_read points here
 {
@@ -1091,6 +1133,12 @@ static UINT8 mapper_prg_read_int(UINT16 address) // mapper_prg_read points here
 		bprintf(0, _T("mapper_prg_read_int(): address %x, bad PRGType[%x]!\n"), address, PRGType[(address & ~0x8000) / 0x2000]);
 	}
 #endif
+
+#if FIND_CHEAT_ROMOFFSET
+	l_address = address;
+	l_offset = PRGMap[(address & ~0x8000) / 0x2000] + (address & 0x1fff);
+#endif
+
 	return prg_maps[PRGType[(address & ~0x8000) / 0x2000]] [PRGMap[(address & ~0x8000) / 0x2000] + (address & 0x1fff)];
 #if 0
 	// the old version, more "readable", but slower.  save to keep sane.
@@ -1833,6 +1881,7 @@ static void mapperFDS_write(UINT16 address, UINT8 data)
 #define mapper01_exbits		(mapper_regs[0x1f - 3])
 #define mapper01_prg2x		(mapper_regs[0x1f - 4])
 static INT32 *mapper01_last_cyc = (INT32*)&mapper_regs16[0];
+static INT32 *mapper105_timer = (INT32*)&mapper_regs16[2];
 
 static void mapper01_write(UINT16 address, UINT8 data)
 {
@@ -1868,6 +1917,52 @@ static void mapper01_write(UINT16 address, UINT8 data)
 		}
 		mapper01_last_cyc[0] = mega_cyc_counter;
     }
+}
+
+static void mapper105_map()
+{
+	if (mapper_regs[1] & 0x8) {
+		// mmc1-mode, can only swap into the second 128k chip ( | 0x8)
+		if (mapper_regs[0] & 0x8) {
+			if (mapper_regs[0] & 0x4) {
+				mapper_map_prg(16, 0, (mapper_regs[3] & 0x7) | 0x8);
+				mapper_map_prg(16, 1, 0x7 | 0x8);
+			} else {
+				mapper_map_prg(16, 0, 0x0 | 0x8);
+				mapper_map_prg(16, 1, (mapper_regs[3] & 0x7) | 0x8);
+			}
+		} else {
+			mapper_map_prg(32, 0, ((mapper_regs[3] & 0x7) | 0x8) >> 1);
+		}
+	} else {
+		// non-mmc1 prg mode, swaps in the first 128k
+		mapper_map_prg(32, 0, ((mapper_regs[1] & 0x6)) >> 1);
+	}
+
+	if (mapper_regs[1] & 0x10) {
+		mapper105_timer[0] = 0;
+		M6502SetIRQLine(0, 0, CPU_IRQSTATUS_NONE);
+	}
+
+	mapper_map_chr( 8, 0, 0 );
+
+	switch (mapper_regs[0] & 3) {
+		case 0: set_mirroring(SINGLE_LOW); break;
+		case 1: set_mirroring(SINGLE_HIGH); break;
+		case 2: set_mirroring(VERTICAL); break;
+		case 3: set_mirroring(HORIZONTAL); break;
+	}
+}
+
+static void mapper105_cycle()
+{
+	if (~mapper_regs[1] & 0x10) {
+		mapper105_timer[0]++;
+		if (mapper105_timer[0] > ((0x10 | (NESDips[2] >> 4)) << 25)) {
+			mapper105_timer[0] = 0;
+			mapper_irq(0);
+		}
+	}
 }
 
 static void mapper01_exp_write(UINT16 address, UINT8 data) // 6000 - 7fff
@@ -2553,7 +2648,7 @@ static void mapper04_write(UINT16 address, UINT8 data)
             case 0x8000: mapper4_banksel = data; break;
             case 0x8001: mapper_regs[(mapper4_banksel & 0x7)] = data; break;
 			case 0xA000: mapper4_mirror = ~data & 1; break;
-			case 0xA001: mapper4_writeprotect = ~data & 1; break;
+			case 0xA001: mapper4_writeprotect = data; break;
             case 0xC000: mapper4_irqlatch = data; break;
             case 0xC001: mapper4_irqreload = 1; break;
             case 0xE000: mapper4_irqenable = 0; M6502SetIRQLine(0, CPU_IRQSTATUS_NONE); break;
@@ -2595,6 +2690,112 @@ static void mapper04_map()
 
 	if (Cart.Mirroring != 4)
 		set_mirroring(mapper4_mirror ? VERTICAL : HORIZONTAL);
+}
+
+// mapper 555: Nintendo Campus Challenge 1991
+// note: extension to mmc3
+static INT32 *mapper555_timer = (INT32*)&mapper_regs16[0];
+
+#define mapper555_reg               (mapper_regs[0x1f - 7])
+#define mapper555_prgbase           (mapper_regs[0x1f - 8])
+#define mapper555_prgmask           (mapper_regs[0x1f - 9])
+#define mapper555_chrbase           (mapper_regs[0x1f - 10])
+#define mapper555_chrmode           (mapper_regs[0x1f - 11])
+
+static void mapper555_map_prg(INT32 pagesz, INT32 slot, INT32 bank)
+{
+	mapper_map_prg(8, slot, mapper555_prgbase | (bank & mapper555_prgmask));
+}
+
+static void mapper555_map_chr(INT32 pagesz, INT32 slot, INT32 bank)
+{
+	const UINT8 masks[] = { 0x7f, 0x3f, 0x07, 0x07 };
+	const UINT8 mask = masks[(mapper555_chrmode) ? (((bank & 0x40) >> 5) + mapper555_chrmode) : 0];
+
+	mapper_map_chr_ramrom(1, slot, mapper555_chrbase + (bank & mask), (mask == 0x07) ? MEM_RAM : MEM_ROM);
+}
+
+static void mapper555_map()
+{
+	mapper555_map_prg(8, 1, mapper_regs[7]);
+
+	const INT32 prg_rev = (mapper4_banksel & 0x40) ? 2 : 0;
+	mapper555_map_prg(8, 0 ^ prg_rev, mapper_regs[6]);
+	mapper555_map_prg(8, 2 ^ prg_rev, -2);
+
+	mapper555_map_prg( 8, 3, -1);
+
+	const INT32 chr_rev = (mapper4_banksel & 0x80) ? 4 : 0;
+	mapper555_map_chr(1, 0 ^ chr_rev, mapper_regs[0] & ~1);
+	mapper555_map_chr(1, 1 ^ chr_rev, mapper_regs[0] | 1);
+	mapper555_map_chr(1, 2 ^ chr_rev, mapper_regs[1] & ~1);
+	mapper555_map_chr(1, 3 ^ chr_rev, mapper_regs[1] | 1);
+
+	mapper555_map_chr(1, 4 ^ chr_rev, mapper_regs[2]);
+	mapper555_map_chr(1, 5 ^ chr_rev, mapper_regs[3]);
+	mapper555_map_chr(1, 6 ^ chr_rev, mapper_regs[4]);
+	mapper555_map_chr(1, 7 ^ chr_rev, mapper_regs[5]);
+
+	if (Cart.Mirroring != 4) { // MMC3: 4 (FOUR_SCREEN) keeps it locked!
+		set_mirroring(mapper4_mirror ? VERTICAL : HORIZONTAL);
+	}
+}
+
+// callbacks for read/writing WRAM
+static void mapper555_prgwrite(UINT16 address, UINT8 data)
+{
+	cart_exp_write_abort = (mapper4_writeprotect & 0xc0) != 0x80;
+}
+
+static UINT8 mapper555_prgread(UINT16 address)
+{
+	return (mapper4_writeprotect & 0x80) ? Cart.WorkRAM[address & Cart.WorkRAMMask] : cpu_open_bus;
+}
+
+static UINT8 mapper555_read(UINT16 address)
+{
+	if (address < 0x5000) {
+		return cpu_open_bus;
+	}
+	if (address >= 0x5000 && address <= 0x57ff) {
+		return Cart.WorkRAM[0x2000 | (address & 0x7ff)];
+	} else {
+		return (mapper555_timer[0] > ((0x10 | (NESDips[2] >> 4)) << 25)) ? 0x80 : 0x00;
+	}
+	return cpu_open_bus;
+}
+
+static void mapper555_write(UINT16 address, UINT8 data)
+{
+	if (address < 0x5000) return;
+
+	if (address >= 0x5000 && address <= 0x57ff) {
+		Cart.WorkRAM[0x2000 | (address & 0x7ff)] = data;
+		return;
+	}
+
+	if (address >= 0x5800 && address <= 0x5bff) {
+		mapper555_reg = data;
+
+		mapper555_prgbase = (data << 3) & 0x20;
+		mapper555_prgmask =((data & 0x03) << 3) | 0x07;
+		mapper555_chrbase = (data & 0x04) << 5;
+		mapper555_chrmode = (data & 0x06) == 0x02; // 2 = "tqrom, aka mapper119" mode. normal mmc3 otherwise
+
+		if (~mapper555_reg & 8) { // timer disabled, reset timer
+			mapper555_timer[0] = 0;
+		}
+
+		mapper_map();
+		return;
+	}
+}
+
+static void mapper555_cycle()
+{
+	if (mapper555_reg & 8) {
+		mapper555_timer[0]++;
+	}
 }
 
 static void mapper258_map()
@@ -3314,7 +3515,7 @@ static void mapper406_write(UINT16 address, UINT8 data)
 
 static void mapper04_scanline()
 {
-	if (NESMode & ALT_MMC3 && RENDERING) {
+	if (NESMode & ALT_MMC3 && !RENDERING) {
 		return;
 	}
 
@@ -3329,7 +3530,7 @@ static void mapper04_scanline()
 		if (spr == bg && _16 == 0) return;
 	}
 
-	INT32 cnt = mapper4_irqcount;
+	INT32 cnt = mapper4_irqcount || (NESMode & ALT_MMC3);
 	if (mapper4_irqcount == 0 || mapper4_irqreload) {
 		mapper4_irqcount = mapper4_irqlatch;
 	} else {
@@ -8154,6 +8355,16 @@ static INT32 mapper_init(INT32 mappernum)
 			break;
 		}
 
+		case 105: { // mmc1 + nwc (Nintendo World Championship 1990)
+			mapper_write = mapper01_write;
+			mapper_map   = mapper105_map;
+			mapper_cycle = mapper105_cycle; // for timer
+			mapper_regs[0] = 0xc;
+			mapper_map();
+			retval = 0;
+			break;
+		}
+
 		case 2: { // UxROM
 			mapper_write = mapper02_write;
 			mapper_map   = mapper02_map;
@@ -9069,7 +9280,7 @@ static INT32 mapper_init(INT32 mappernum)
 			break;
 		}
 
-		case 206: // mmc3 w/no irq (Tengen mimic-1, Namcot 118)
+		case 206: // mmc3 w/no irq (Tengen mimic-1, Namcot 118, 106)
 		case 4: { // mmc3
 			mapper_write = mapper04_write;
 			mapper_map   = mapper04_map;
@@ -9104,6 +9315,41 @@ static INT32 mapper_init(INT32 mappernum)
 			mapper_regs[7] = 1;
 
 			mapper_map_prg( 8, 3, -1);
+		    mapper_map();
+			retval = 0;
+			break;
+		}
+
+		case 555: { // NCC
+			// mmc3 stuff
+			mapper_write = mapper04_write;        // 8000-ffff, write only
+			mapper_scanline = mapper04_scanline;
+			mapper4_mirror = Cart.Mirroring;// inherit mirror from cart header
+
+			mapper_map   = mapper555_map;
+
+			psg_area_write = mapper555_write;     // 4000-5fff
+			psg_area_read = mapper555_read;       // 4000-5fff
+
+			cart_exp_write = mapper555_prgwrite;  // 6000-6fff
+			cart_exp_read = mapper555_prgread;    // 6000-6fff
+
+			mapper_cycle = mapper555_cycle; // for timer
+
+			// default mmc3 regs:
+			// chr
+			mapper555_prgmask = 0x07;
+
+			mapper_regs[0] = 0;
+			mapper_regs[1] = 2;
+			mapper_regs[2] = 4;
+			mapper_regs[3] = 5;
+			mapper_regs[4] = 6;
+			mapper_regs[5] = 7;
+			// prg
+			mapper_regs[6] = 0;
+			mapper_regs[7] = 1;
+
 		    mapper_map();
 			retval = 0;
 			break;
@@ -9454,14 +9700,6 @@ static void UpdatePalettePointer()
 	}
 }
 
-static UINT8 GetAvgBrightness(INT32 x, INT32 y)
-{
-	// Zapper Detection
-	const UINT32 rgbcolor = our_palette[pTransDraw[(y) * 256 + x] & 0x3f];
-
-	return ((rgbcolor & 0xff) + ((rgbcolor >> 8) & 0xff) + ((rgbcolor >> 16) & 0xff)) / 3;
-}
-
 static INT32 nes_frame_cycles;
 static UINT32 nes_ppu_cyc_mult;
 static UINT32 prerender_line; // ntsc 261, pal 311
@@ -9482,6 +9720,7 @@ static UINT16 v_addr, t_addr; // vram addr (loopy-v), temp vram addr (loopy-t)
 static UINT16 v_addr_update;
 static UINT32 v_addr_update_delay;
 static UINT8 fine_x; // fine-x (scroll)
+static UINT8 sprite0_timer;
 
 #if 0 // moved above the mapper section
 static UINT8 ppu_ctrl;
@@ -9729,7 +9968,7 @@ static void ppu_write(UINT16 reg, UINT8 data)
 			}
 
 			ppu_ctrl = data;
-			//bprintf(0, _T("PPUCTRL reg: %X   scanline %d  pixel %d   frame %d  PC  %X\n"), ctrl.reg, scanline, pixel, nCurrentFrame, M6502GetPC(-1));
+			//bprintf(0, _T("PPUCTRL reg: %X   scanline %d  pixel %d   frame %d  PC  %X\n"), ppu_ctrl, scanline, pixel, nCurrentFrame, M6502GetPC(-1));
 			t_addr = (t_addr & 0x73ff) | ((data & ctrl_ntbase) << 10);
 
 			sprite_height = (ppu_ctrl & ctrl_sprsize) ? 16 : 8;
@@ -9844,8 +10083,6 @@ static void evaluate_sprites()
 	INT32 cur_line = (scanline == prerender_line) ? -1 : scanline;
 	oam2_cnt = 0;
 
-	memset(sprite_cache, 0, sizeof(sprite_cache));
-
     for (INT32 i = oamAddr; i < 0x40; i++) {
         INT32 line = cur_line - oam_ram[(i << 2) + 0];
         if (line >= 0 && line < sprite_height) {
@@ -9865,6 +10102,8 @@ static void evaluate_sprites()
 
 static void load_sprites()
 {
+	memset(sprite_cache, 0, sizeof(sprite_cache));
+
 	oam_cnt = 0;
 	for (INT32 i = 0; i < oam2_cnt; i++) {
 		oam[oam_cnt++] = oam2[i];
@@ -9937,7 +10176,8 @@ static void draw_and_shift()
 					continue;
 
 				if (oam[i].idx == 0 && pix && x != 0xff) {
-					ppu_status |= status_sp0hit;
+					sprite0_timer = (NESMode & IS_PAL) ? 2 : 1; // rainbow islands (ocean) shaking HUD
+//					ppu_status |= status_sp0hit;
 				}
 
                 spr |= (oam[i].attr & 3) << 2; // add color (attr), 2bpp shift
@@ -9997,6 +10237,7 @@ static inline void scanlinestate(INT32 state)
 				memset(oam2, 0xff, sizeof(oam2)); // clear secondary oam
 
 				if (state == PRERENDER) {
+					//bprintf(0, _T("prerender, clear vblank.  x/scan: %d %d\n"), pixel, scanline);
 					ppu_status &= status_openbus; // clear vbl, spr0 hit & overflow bits
 
 					if (oamAddr > 7) { // 2c02 oamram corruption (Huge Insect, Tatakai no Banka pre-revA)
@@ -10074,6 +10315,13 @@ static inline void scanlinestate(INT32 state)
 			ppu_bus_address = 0x2000 | (v_addr & 0x0fff);
 		}
 
+		if (sprite0_timer) {
+			sprite0_timer--;
+			if (sprite0_timer == 0) {
+				ppu_status |= status_sp0hit;
+			}
+		}
+
 		// Signal scanline to mapper: (+18 gets rid of jitter in Kirby, Yume Penguin Monogatari, Klax, ...)
 		// Note: was 20, but caused occasional flickering in the rasterized water in "Kira Kira Star Night GOLD" (maybe the others in the series, too?)
 		if (pixel == (260+18) /*&& RENDERING*/ && mapper_scanline) mapper_scanline();
@@ -10100,12 +10348,11 @@ void ppu_cycle()
 			set_scanline(0);
 			ppu_frame++;
 			ppu_odd ^= 1;
-			if (RENDERING && ppu_odd) {
+			if (ppu_odd && ~NESMode & IS_PAL) {
 				// this real hw hack was added to the ppu back in the day for better
 				// rf/composite output.  since it messes with current cpu:ppu
 				// sync. and isn't really necessary w/emu, let's disable it. -dink
 				//pixel++;
-				//ppu_framecycles++;
 			}
         }
 	}
@@ -10136,10 +10383,6 @@ static void ppu_run(INT32 cyc)
 	while (ppu_over < 0) { // we didn't run enough cycles last frame, catch-up!
 		cyc++;
 		ppu_over++;
-	}
-
-	if ((NESMode & IS_PAL) && (mega_cyc_counter % 5) == 0) {
-		cyc++;
 	}
 
 	while (cyc) {
@@ -10179,6 +10422,7 @@ static void ppu_scan(INT32 nAction)
 	SCAN_VAR(ppu_pal_emphasis);
 	SCAN_VAR(spritemasklimit);
 	SCAN_VAR(bgmasklimit);
+	SCAN_VAR(sprite0_timer);
 
 	SCAN_VAR(ppu_no_nmi_this_frame);
 	SCAN_VAR(ppu_odd);
@@ -10221,6 +10465,7 @@ static void ppu_reset()
 	}
 	pixel = 0;
 	ppu_frame = 0;
+	sprite0_timer = 0;
 
 	v_addr = 0;
 	t_addr = 0;
@@ -10251,7 +10496,7 @@ static void ppu_reset()
 
 	ppu_framecycles = 0; // total ran cycles this frame
 
-    memset(nt_ram, 0xff, sizeof(nt_ram));
+    memset(nt_ram, 0x00, sizeof(nt_ram));
 	memset(pal_ram, 0x00, sizeof(pal_ram));
     memset(oam_ram, 0xff, sizeof(oam_ram));
 
@@ -10284,16 +10529,24 @@ static void ppu_init(INT32 is_pal)
 	if (is_pal) {
 		nes_frame_cycles = 33248; // pal
 		prerender_line = 311;
-		nes_ppu_cyc_mult = (UINT32)((float)3.2 * (1 << 12));
+		nes_ppu_cyc_mult = (UINT32)((float)3.2 * (1 << 15));
 	} else {
 		nes_frame_cycles = 29781; // ntsc (default)
-		nes_ppu_cyc_mult = (UINT32)((float)3.0 * (1 << 12));
+		nes_ppu_cyc_mult = (UINT32)((float)3.0 * (1 << 15));
 		prerender_line = 261;
 	}
 
 	screen = (UINT16*)BurnMalloc((256+8) * (256+8) * sizeof(UINT16));
 
 	ppu_reset();
+}
+
+static UINT8 GetAvgBrightness(INT32 x, INT32 y)
+{
+	// Zapper Detection
+	const UINT32 rgbcolor = our_palette[screen[(y) * 256 + x] & 0x3f];
+
+	return ((rgbcolor & 0xff) + ((rgbcolor >> 8) & 0xff) + ((rgbcolor >> 16) & 0xff)) / 3;
 }
 
 enum {
@@ -10618,7 +10871,9 @@ static inline UINT8 cheat_check(UINT16 address, UINT8 value)
 {
 	for (INT32 i = 0; i < cheats_active; i++) {
 		if (cheats[i].address == address && (cheats[i].compare == -1 || cheats[i].compare == value)) {
-		 //   bprintf(0, _T("."));
+#if FIND_CHEAT_ROMOFFSET
+			bprintf(0, _T("%x %x -> %x, prg addy/offset: %x  %x\n"), address, cheats[i].compare, cheats[i].value, l_address, l_offset);
+#endif
 			return cheats[i].value;
 		}
 	}
@@ -10798,7 +11053,7 @@ INT32 NESInit()
 	ppu_init((NESMode & IS_PAL) ? 1 : 0);
 
 	if (NESMode & IS_PAL) {
-		nesapuInitPal(0, 1798773, 0);
+		nesapuInitPal(0, 1662607, 0);
 	} else {
 		nesapuInit(0, 1798773, 0);
 	}
@@ -11145,6 +11400,11 @@ INT32 nes_scanline()
 	return scanline;
 }
 
+INT32 nes_pixel()
+{
+	return pixel;
+}
+
 INT32 NESFrame()
 {
 #if DEBUG_CYC
@@ -11226,7 +11486,7 @@ INT32 NESFrame()
 
 		mapper_run();
 
-		const INT32 p_cyc = ((cyc_counter * nes_ppu_cyc_mult) >> 12) - ppu_framecycles;
+		const INT32 p_cyc = ((cyc_counter * nes_ppu_cyc_mult) >> 15) - ppu_framecycles;
 		if (p_cyc > 0) {
 			ppu_run(p_cyc);
 		}

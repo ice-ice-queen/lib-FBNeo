@@ -43,6 +43,7 @@ static UINT8 DrvMah9[8];
 static UINT8 DrvMahs[10];
 static UINT32 DrvInputs[2];
 static UINT8 DrvDips[3];
+static UINT8 DrvDiag[1];
 static UINT8 DrvReset;
 
 static INT32 mahjong = 0;
@@ -93,6 +94,7 @@ static struct BurnInputInfo LoderndfInputList[] = {
 	{"P4 Button 2",		BIT_DIGITAL,	DrvJoy2 + 21,	"p4 fire 2"	},
 	{"P4 Button 3",		BIT_DIGITAL,	DrvJoy2 + 22,	"p4 fire 3"	},
 
+	{"Service Mode",	BIT_DIGITAL,	DrvDiag + 0,		"diag"		},
 	{"Reset",		BIT_DIGITAL,	&DrvReset,	"reset"		},
 	{"Service",		BIT_DIGITAL,	DrvJoy1 + 4,	"service"	},
 	{"Service",		BIT_DIGITAL,	DrvJoy1 + 7,	"service"	},
@@ -132,6 +134,7 @@ static struct BurnInputInfo HotdebutInputList[] = {
 	{"P4 Button 3",		BIT_DIGITAL,	DrvJoy2 + 18,	"p4 fire 3"	},
 	{"P4 Button 4",		BIT_DIGITAL,	DrvJoy2 + 19,	"p4 fire 4"	},
 
+	{"Service Mode",	BIT_DIGITAL,	DrvDiag + 0,		"diag"		},
 	{"Reset",		BIT_DIGITAL,	&DrvReset,	"reset"		},
 	{"Service",		BIT_DIGITAL,	DrvJoy1 + 4,	"service"	},
 	{"Service",		BIT_DIGITAL,	DrvJoy1 + 7,	"service"	},
@@ -186,6 +189,7 @@ static struct BurnInputInfo HotgmckInputList[] = {
 	{"P2 Ron",		BIT_DIGITAL,	DrvMah8 + 4,	"mah ron"	},
 	{"P2 Reach",	BIT_DIGITAL,	DrvMah7 + 4,	"mah reach"	},
 
+	{"Service Mode",	BIT_DIGITAL,	DrvDiag + 0,		"diag"		},
 	{"Reset",		BIT_DIGITAL,	&DrvReset,	"reset"		},
 	{"Service",		BIT_DIGITAL,	DrvMah1 + 4,	"service"	},
 	{"Service",		BIT_DIGITAL,	DrvMah1 + 7,	"service"	},
@@ -197,14 +201,10 @@ STDINPUTINFO(Hotgmck)
 
 static struct BurnDIPInfo LoderndfDIPList[]=
 {
-	DIP_OFFSET(0x27)
+	DIP_OFFSET(0x28)
 	{0x00, 0xff, 0xff, 0x60, NULL					},
 	{0x01, 0xff, 0xff, 0x01, NULL					},
 	{0x02, 0xff, 0xff, 0x01, NULL					},
-
-	{0   , 0xfe, 0   ,    2, "Service Mode"				},
-	{0x00, 0x01, 0x20, 0x20, "Off"					},
-	{0x00, 0x01, 0x20, 0x00, "On"					},
 
 	{0   , 0xfe, 0   ,    2, "Debug"				},
 	{0x00, 0x01, 0x40, 0x40, "Off"					},
@@ -223,13 +223,9 @@ STDDIPINFO(Loderndf)
 
 static struct BurnDIPInfo HotdebutDIPList[]=
 {
-	DIP_OFFSET(0x1b)
+	DIP_OFFSET(0x1c)
 	{0x00, 0xff, 0xff, 0x60, NULL		},
 	{0x01, 0xff, 0xff, 0x01, NULL		},
-
-	{0   , 0xfe, 0   ,    2, "Service Mode"	},
-	{0x00, 0x01, 0x20, 0x20, "Off"		},
-	{0x00, 0x01, 0x20, 0x00, "On"		},
 
 	{0   , 0xfe, 0   ,    2, "Debug"	},
 	{0x00, 0x01, 0x40, 0x40, "Off"		},
@@ -244,13 +240,9 @@ STDDIPINFO(Hotdebut)
 
 static struct BurnDIPInfo HotgmckDIPList[]=
 {
-	DIP_OFFSET(0x2d)
+	DIP_OFFSET(0x2e)
 	{0x00, 0xff, 0xff, 0x60, NULL		},
 	{0x01, 0xff, 0xff, 0x01, NULL		},
-
-	{0   , 0xfe, 0   ,    2, "Service Mode"	},
-	{0x00, 0x01, 0x20, 0x20, "Off"		},
-	{0x00, 0x01, 0x20, 0x00, "On"		},
 
 	{0   , 0xfe, 0   ,    2, "Debug"	},
 	{0x00, 0x01, 0x40, 0x40, "Off"		},
@@ -307,7 +299,7 @@ static UINT32 psikyo4_read_inputs(INT32 bsel)
 	return 0;
 }
 
-UINT32 __fastcall ps4_read_long(UINT32 address)
+static UINT32 __fastcall ps4_read_long(UINT32 address)
 {
 	address &= 0xc7fffffc;
 
@@ -330,7 +322,7 @@ UINT32 __fastcall ps4_read_long(UINT32 address)
 	return 0;
 }
 
-void __fastcall ps4_write_long(UINT32 address, UINT32 data)
+static void __fastcall ps4_write_long(UINT32 address, UINT32 data)
 {
 	address &= 0xc7fffffc;
 
@@ -351,7 +343,7 @@ void __fastcall ps4_write_long(UINT32 address, UINT32 data)
 	}
 }
 
-UINT16 __fastcall ps4_read_word(UINT32 address)
+static UINT16 __fastcall ps4_read_word(UINT32 address)
 {
 	address &= 0xc7fffffe;
 #ifdef LSB_FIRST
@@ -368,7 +360,7 @@ UINT16 __fastcall ps4_read_word(UINT32 address)
 	switch (address)
 	{
 		case 0x03003fe2:
-			return DrvDips[1] | ((EEPROMRead() & 1) << 4);
+			return (loderndf ? DrvDips[1] : 0) | ((EEPROMRead() & 1) << 4);
 
 		case 0x05800000: // used?
 			return psikyo4_read_inputs(0);
@@ -386,7 +378,7 @@ UINT16 __fastcall ps4_read_word(UINT32 address)
 	return 0;
 }
 
-UINT8 __fastcall ps4_read_byte(UINT32 address)
+static UINT8 __fastcall ps4_read_byte(UINT32 address)
 {
 	address &= 0xc7ffffff;
 
@@ -408,7 +400,7 @@ UINT8 __fastcall ps4_read_byte(UINT32 address)
 	switch (address)
 	{
 		case 0x03003fe1:
-			return DrvDips[1] | ((EEPROMRead() & 1) << 4);
+			return (loderndf ? DrvDips[1] : 0) | ((EEPROMRead() & 1) << 4);
 		
 		case 0x05000000:
 			return BurnYMF278BReadStatus();
@@ -432,7 +424,7 @@ UINT8 __fastcall ps4_read_byte(UINT32 address)
 	return 0;
 }
 
-void __fastcall ps4_write_word(UINT32 address, UINT16 data)
+static void __fastcall ps4_write_word(UINT32 address, UINT16 data)
 {
 	address &= 0xc7fffffe;
 #ifdef LSB_FIRST
@@ -461,7 +453,7 @@ void __fastcall ps4_write_word(UINT32 address, UINT16 data)
 	}
 }
 
-void __fastcall ps4_write_byte(UINT32 address, UINT8 data)
+static void __fastcall ps4_write_byte(UINT32 address, UINT8 data)
 {
 	address &= 0xc7ffffff;
 
@@ -550,7 +542,7 @@ void __fastcall ps4_write_byte(UINT32 address, UINT8 data)
 	}
 }
 
-UINT32 __fastcall ps4hack_read_long(UINT32 a)
+static UINT32 __fastcall ps4hack_read_long(UINT32 a)
 {
 	a &= 0xffffc;
 
@@ -567,7 +559,7 @@ UINT32 __fastcall ps4hack_read_long(UINT32 a)
 	return *((UINT32*)(DrvSh2RAM + a));
 }
 
-UINT16 __fastcall ps4hack_read_word(UINT32 a)
+static UINT16 __fastcall ps4hack_read_word(UINT32 a)
 {
 #ifdef LSB_FIRST
 	return *((UINT16 *)(DrvSh2RAM + ((a & 0xffffe) ^ 2)));
@@ -576,7 +568,7 @@ UINT16 __fastcall ps4hack_read_word(UINT32 a)
 #endif
 }
 
-UINT8 __fastcall ps4hack_read_byte(UINT32 a)
+static UINT8 __fastcall ps4hack_read_byte(UINT32 a)
 {
 #ifdef LSB_FIRST
 	return DrvSh2RAM[(a & 0xfffff) ^ 3];
@@ -660,7 +652,7 @@ static INT32 DrvDoReset()
 	sample_offs = 0;
 	memset (ioselect, 0xff, 4);
 	ioselect[2] = 0x32;
-	
+
 	if (mahjong) {
 		pcmbank_previous = ~0;
 		set_pcm_bank();
@@ -710,15 +702,12 @@ static void BurnSwapEndian()
 
 static INT32 DrvSynchroniseStream(INT32 nSoundRate)
 {
-	return (long long)Sh2TotalCycles() * nSoundRate / 28636350;
+	return (INT64)Sh2TotalCycles() * nSoundRate / 28636350;
 }
 
 static void DrvIRQCallback(INT32, INT32 nStatus)
 {
-	if (nStatus)
-		Sh2SetIRQLine(12, CPU_IRQSTATUS_ACK);
-	else
-		Sh2SetIRQLine(12, CPU_IRQSTATUS_NONE);
+	Sh2SetIRQLine(12, (nStatus) ? CPU_IRQSTATUS_ACK : CPU_IRQSTATUS_NONE);
 }
 
 static INT32 DrvInit(INT32 (*LoadCallback)(), INT32 gfx_len)
@@ -853,6 +842,9 @@ static void draw_sprites(UINT16 *dest, UINT32 scr)
 
 					if (sx < -15 || sx >= 320 || sy < -15 || sy >= nScreenHeight || nGfxMask < code) continue;
 
+					Draw16x16MaskTile(dest, code, sx, sy, flipx, flipy, colr, 5, 0, 0, DrvGfxROM);
+
+#if 0
 					if (flipy) {
 						if (flipx) {
 							Render16x16Tile_Mask_FlipXY_Clip(dest, code, sx, sy, colr, 5, 0, 0, DrvGfxROM);
@@ -866,6 +858,7 @@ static void draw_sprites(UINT16 *dest, UINT32 scr)
 							Render16x16Tile_Mask_Clip(dest, code, sx, sy, colr, 5, 0, 0, DrvGfxROM);
 						}
 					}
+#endif
 				}
 			}
 		}
@@ -877,7 +870,7 @@ static void draw_sprites(UINT16 *dest, UINT32 scr)
 
 static void DrvDoPalette(UINT32 *dst, INT32 c)
 {
-	UINT8 r,g,b;
+	UINT8 r, g, b;
 	UINT32 *p = (UINT32*)DrvPalRAM;
 	for (INT32 i = 0; i < 0x2000 / 4; i++) {
 		r = p[i] >> 24;
@@ -934,7 +927,7 @@ static INT32 DrvDraw()
 	else {
 		for (INT32 y = 0; y < nScreenHeight; y++) {
 			for (INT32 x = 0; x < 320; x++) {
-				pTransDraw[y * 320 + x] = 0x1001;
+				pTransDraw[y * 320 + x] = 0x1000;
 			}
 		}
 
@@ -956,6 +949,7 @@ static INT32 DrvFrame()
 	Sh2NewFrame();
 
 	{
+		DrvDips[0] = (DrvDips[0] & ~(1<<5)) | (!DrvDiag[0] << 5);
 		if (mahjong) {
 			memset (DrvMahs, 0xff, 10);
 			DrvMahs[0] = (~0x60) | (DrvDips[0] & 0x60);
@@ -1001,7 +995,7 @@ static INT32 DrvScan(INT32 nAction, INT32 *pnMin)
 	if (pnMin != NULL) {
 		*pnMin =  0x029707;
 	}
-	
+
 	if (nAction & ACB_MEMORY_RAM) {
 		ba.Data		= AllRam;
 		ba.nLen		= RamEnd - AllRam;
@@ -1009,7 +1003,7 @@ static INT32 DrvScan(INT32 nAction, INT32 *pnMin)
 		ba.szName	= "All RAM";
 		BurnAcb(&ba);
 	}
-	
+
 	if (nAction & ACB_DRIVER_DATA) {
 		Sh2Scan(nAction);
 		BurnYMF278BScan(nAction, pnMin);

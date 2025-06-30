@@ -83,14 +83,26 @@ static INT32 ConfigParseFile(TCHAR* pszFilename, const std::vector<char>* iniCon
 
 	FILE* h = NULL;
 	const char* iniPtr = NULL;
-
+  
 	if (iniContent) {
 		iniPtr = iniContent->data();
 	} else {
-		h = _tfopen(pszFilename, _T("rt"));
-		if (h == NULL) {
-			return 1;
-		}
+    TCHAR* pszReadMode = AdaptiveEncodingReads(pszFilename);
+    if (NULL == pszReadMode) pszReadMode = _T("rt");
+    h = _tfopen(pszFilename, pszReadMode);
+    if (h == NULL) {
+      if ((BurnDrvGetFlags() & BDF_CLONE) && BurnDrvGetText(DRV_PARENT)) {
+        TCHAR szAlternative[MAX_PATH] = { 0 };
+        _stprintf(szAlternative, _T("%s%s.ini"), szAppCheatsPath, BurnDrvGetText(DRV_PARENT));
+
+        pszReadMode = AdaptiveEncodingReads(szAlternative);
+        if (NULL == pszReadMode) pszReadMode = _T("rt");
+
+        if (NULL == (h = _tfopen(szAlternative, pszReadMode)))
+          return 1;
+      } else {
+        return 1;	// Parent driver
+      }
 	}
 
 	while (1) {
@@ -373,9 +385,23 @@ static INT32 ConfigParseFile(TCHAR* pszFilename, const std::vector<char>* iniCon
 //TODO: make cross platform
 static INT32 ConfigParseNebulaFile(TCHAR* pszFilename)
 {
-	FILE *fp = _tfopen(pszFilename, _T("rt"));
+	TCHAR* pszReadMode = AdaptiveEncodingReads(pszFilename);
+	if (NULL == pszReadMode) pszReadMode = _T("rt");
+
+	FILE *fp = _tfopen(pszFilename, pszReadMode);
 	if (fp == NULL) {
-		return 1;
+		if ((BurnDrvGetFlags() & BDF_CLONE) && BurnDrvGetText(DRV_PARENT)) {
+			TCHAR szAlternative[MAX_PATH] = { 0 };
+			_stprintf(szAlternative, _T("%s%s.dat"), szAppCheatsPath, BurnDrvGetText(DRV_PARENT));
+
+			pszReadMode = AdaptiveEncodingReads(szAlternative);
+			if (NULL == pszReadMode) pszReadMode = _T("rt");
+
+			if (NULL == (fp = _tfopen(szAlternative, pszReadMode)))
+				return 1;
+		} else {
+			return 1;	// Parent driver
+		}
 	}
 
 	INT32 nLen;
@@ -848,7 +874,11 @@ static INT32 ConfigParseMAMEFile()
 		_stprintf(szFileName, _T("%scheat.dat"), szAppCheatsPath);
 	}
 
-	FILE *fz = _tfopen(szFileName, _T("rt"));
+	TCHAR* pszReadMode = AdaptiveEncodingReads(szFileName);
+	if (NULL == pszReadMode) pszReadMode = _T("rt");
+
+	FILE *fz = _tfopen(szFileName, pszReadMode);
+
 	INT32 ret = 1;
 
 	const TCHAR* DrvName = BurnDrvGetText(DRV_NAME);
